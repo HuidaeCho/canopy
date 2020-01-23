@@ -168,6 +168,8 @@ def clip_final_tiles(phyreg_ids):
     snaprast_path = canopy_config.snaprast_path
     results_path = canopy_config.results_path
 
+    naipqq_oidfield = arcpy.Describe(naipqq_layer).OIDFieldName.encode()
+
     arcpy.env.addOutputsToMap = False
     arcpy.env.snapRaster = snaprast_path
 
@@ -186,9 +188,9 @@ def clip_final_tiles(phyreg_ids):
                     where_clause="%s like '%%,%d,%%'" % (naipqq_phyregs_field,
                         phyreg_id))
             with arcpy.da.SearchCursor(naipqq_layer,
-                    ['FID', 'FileName']) as cur2:
+                    [naipqq_oidfield, 'FileName']) as cur2:
                 for row2 in sorted(cur2):
-                    fid = row2[0]
+                    oid = row2[0]
                     filename = row2[1][:-13]
                     frtiffile_path = '%s/fr%s.tif' % (outdir_path, filename)
                     cfrtiffile_path = '%s/cfr%s.tif' % (outdir_path, filename)
@@ -196,8 +198,7 @@ def clip_final_tiles(phyreg_ids):
                         continue
                     if os.path.exists(frtiffile_path):
                         arcpy.SelectLayerByAttribute_management(naipqq_layer,
-                                where_clause="FID=%d" % fid)
-
+                                where_clause="%s=%d" % (naipqq_oidfield, oid)
                         arcpy.gp.ExtractByMask_sa(frtiffile_path, naipqq_layer,
                                 cfrtiffile_path)
     print("Completed")
