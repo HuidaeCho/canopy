@@ -275,64 +275,63 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     mosaic_clipped_final_tiles(phyreg_ids)
     
 def gt_point(count):
+    '''
+    This function is designed to provide randomized points for ground truthing.
+
+    The points are projected in WKID 102039: USA Contiguous Albers Equal Area
+    Conic USGS version
 	'''
-	This function is designed to provide randomized points for ground truthing.
-	
-	The points are projected in WKID 102039: USA Contiguous Albers Equal Area 
-	Conic USGS version
-	
-	
-	'''
-	
-	project_path = canopy_config.project_path
-	phyregs_layer = canopy_config.phyregs_layer
-	results_path = canopy_config.results_path
-	ind_regions =  '%s/IndvidualRegions' %results_path
-	ouput_folder = '%s/GroundTruth' % results_path
-	
-	regions_path = []
-	names = []
     
-    arcpy.env.overwriteOutput=True
-    arcpy.env.addOutputsToMap=False
+    arcpy.overwriteOutputs = True
+    arcpy.env.addOutputsToMap = False
+    
+    project_path = canopy_config.project_path
+    phyregs_layer = canopy_config.phyregs_layer
+    results_path = canopy_config.results_path
+    ind_regions = '%s/IndvidualRegions' % results_path
+    ouput_folder = '%s/GroundTruth' % results_path
+
+    regions_path = []
+    names = []
+
 
     # WKID 102039: USA Contiguous Albers Equal Area Conic USGS version
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(102039)
-	
-	if not os.path.exists(ind_regions):
-		os.makedirs(ind_regions)
-	
-	arcpy.SplitByAttributes_analysis(phyregs_layer, ind_regions, ['NAME'])
-	
-	for dir, subdir, files in os.walk(ind_regions):
-		for f in files:
-			if f.endswith('.shp'):
-				regions_path.append(os.path.join(ind_regions, f))
-			if len(regions_path) == 24:
-					continue
-		for f in files:
-			if f.endswith('.shp'):
-				names.append('gt_' + f[:-4])
-		if os.path.exists(ouput_folder):
-				break
-		if not os.path.exists(ouput_folder):
-			os.makedirs(ouput_folder)
+    
+    if not os.path.exists(ind_regions):
+        os.makedirs(ind_regions)
+        arcpy.SplitByAttributes_analysis(phyregs_layer, ind_regions, ['NAME'])
 
-	in_file = []
-	for i in range(len(names)):
-		for f in names:
-			rp_points = results_path + '/%s' % f
-		if os.path.exists(rp_points + '.shp'):
-			break
-		if not os.path.exists(rp_points + '.shp'):
-			arcpy.CreateRandomPoints_management(results_path, names[i], regions_path[i], '', count)
-			print(names[i])
-			
-	for dir, subdir, files in os.walk(results_path):
-		for f in files:
-			if f.endswith('.shp'):
-				in_file.append(os.path.join(results_path, f))
-		for i in range(len(in_file)):
-			arcpy.AddFields_management(in_file[i], [['GT_2009', 'TEXT'], ['GT_2015', 'TEXT']])
+    for dir, subdir, files in os.walk(ind_regions):
+        for f in files:
+            if f.endswith('.shp'):
+                regions_path.append(os.path.join(ind_regions, f))
+            if len(regions_path) == 24:
+                continue
+        for f in files:
+            if f.endswith('.shp'):
+                names.append('gt_' + f[:-4])
+        if os.path.exists(ouput_folder):
+            break
+        if not os.path.exists(ouput_folder):
+            os.makedirs(ouput_folder)
+
+    in_file = []
+    for i in range(len(names)):
+        for f in names:
+            rp_points = ouput_folder + '/%s' % f
+        if os.path.exists(rp_points + '.shp'):
+            break
+        if not os.path.exists(rp_points + '.shp'):
+            arcpy.CreateRandomPoints_management(ouput_folder, names[i], regions_path[i], '', count)
+            print(names[i])
+
+    for dir, subdir, files in os.walk(ouput_folder):
+        for f in files:
+            if f.endswith('.shp'):
+                in_file.append(os.path.join(ouput_folder, f))
+        for i in range(24):
+            arcpy.AddFields_management(in_file[i], [['GT_2009', 'TEXT'], ['GT_2015', 'TEXT']])
+    print('Completed.')
 
 
