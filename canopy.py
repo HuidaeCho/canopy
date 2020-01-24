@@ -213,6 +213,7 @@ def mosaic_clipped_final_tiles(phyreg_ids):
     phyregs_layer = canopy_config.phyregs_layer
     naipqq_layer = canopy_config.naipqq_layer
     naipqq_phyregs_field = canopy_config.naipqq_phyregs_field
+    analysis_year = canopy_config.analysis_year
     snaprast_path = canopy_config.snaprast_path
     results_path = canopy_config.results_path
 
@@ -230,10 +231,11 @@ def mosaic_clipped_final_tiles(phyreg_ids):
             outdir_path = '%s/%s/Outputs' % (results_path, name)
             if not os.path.exists(outdir_path):
                 continue
-            canopytif_path = '%s/canopy_2009_%s.tif' % (outdir_path, name)
+            canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
+                analysis_year, name)
             if os.path.exists(canopytif_path):
                 continue
-            mosaictif_filename = 'mosaic_2009_%s.tif' % name
+            mosaictif_filename = 'mosaic_%d_%s.tif' % (analysis_year, name)
             mosaictif_path = '%s/%s' % (outdir_path, mosaictif_filename)
             if not os.path.exists(mosaictif_path):
                 arcpy.SelectLayerByAttribute_management(naipqq_layer,
@@ -274,57 +276,44 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def generate_ground_truthing_points(count):
+def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
     '''
     This function generates randomized points for ground truthing.
 
-    count: number of random points
+    phyreg_ids:     list of physiographic region IDs to process
+    analysis_years: list of field names to store point canopy data
+    point_count:    number of random points
     '''
     phyregs_layer = canopy_config.phyregs_layer
     spatref_wkid = canopy_config.spatref_wkid
-    results_path = canopy_config.results_path
-    ind_regions = '%s/IndvidualRegions' % results_path
-    ouput_folder = '%s/GroundTruth' % results_path
+    project_path = canopy_config.project_path
+    analysis_path_format = canopy_config.analysis_path_format
 
-    arcpy.overwriteOutputs = True
+    outdir_path = '%s/Results' % project_path
+
     arcpy.env.addOutputsToMap = False
+    # XXX: Overwriting can fail because of existing locks!
+    arcpy.env.overwriteOutput = True
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
 
-    regions_path = []
-    names = []
-
-    if not os.path.exists(ind_regions):
-        os.makedirs(ind_regions)
-        arcpy.SplitByAttributes_analysis(phyregs_layer, ind_regions, ['NAME'])
-
-    for dir, subdir, files in os.walk(ind_regions):
-        for f in files:
-            if f.endswith('.shp'):
-                regions_path.append(os.path.join(ind_regions, f))
-            if len(regions_path) == 24:
-                continue
-        for f in files:
-            if f.endswith('.shp'):
-                names.append('gt_' + f[:-4])
-        if os.path.exists(ouput_folder):
-            break
-        if not os.path.exists(ouput_folder):
-            os.makedirs(ouput_folder)
-
-    in_file = []
-    for i in range(len(names)):
-        for f in names:
-            rp_points = ouput_folder + '/%s' % f
-        if os.path.exists(rp_points + '.shp'):
-            break
-        if not os.path.exists(rp_points + '.shp'):
-            arcpy.CreateRandomPoints_management(ouput_folder, names[i], regions_path[i], '', count)
-            print(names[i])
-
-    for dir, subdir, files in os.walk(ouput_folder):
-        for f in files:
-            if f.endswith('.shp'):
-                in_file.append(os.path.join(ouput_folder, f))
-        for i in range(24):
-            arcpy.AddFields_management(in_file[i], [['GT_2009', 'TEXT'], ['GT_2015', 'TEXT']])
+    arcpy.SelectLayerByAttribute_management(phyregs_layer,
+            where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
+        for row in cur:
+            name = row[0]
+            print(name)
+            name = name.replace(' ', '_')
+            phyreg_id = row[1]
+            if not os.path.exists(outdir_path):
+                os.mkdir(outdir_path)
+            shp_filename = 'gtpoints_%s.shp' % name
+            shp_path = '%s/%s' % (outdir_path, shp_filename)
+            arcpy.SelectLayerByAttribute_management(phyregs_layer,
+                    where_clause="PHYSIO_ID=%d" % phyreg_id)
+            arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
+                    phyregs_layer, '', count)
+            for analysis_year in analysis_years:
+                field = 'GT_%d' % analysis_year
+                arcpy.AddField_management(shp_path, field, 'SHORT')
+                # TODO: Read cell values from canopy_YEAR_PHYREG.tif
     print('Completed.')

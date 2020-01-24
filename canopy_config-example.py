@@ -56,12 +56,16 @@ naip_path = 'F:/Georgia/ga'
 spatref_wkid = 102039
 
 # The default structure of the project folder is defined as follows:
-# C:/.../2009 Analysis/ (project_path)
+# C:/.../ (project_path)
+#        Data/
+#             Physiographic_Districts_GA.shp (added as a layer)
+#        Results/
+#                gtpoints_Winder_Slope.shp
+#                ...
+#        2009 Analysis/ (analysis_path)
 #                      Data/
-#                           Physiographic_Districts_GA.shp (added as a layer)
 #                           naip_ga_2009_1m_m4b.shp (added as a layer)
 #                           snaprast.tif (snaprast_path)
-#                           spatref.tif (spatrast_path)
 #                      Results/ (results_path)
 #                              Winder_Slope/ (physiographic region name)
 #                                           Inputs/
@@ -70,20 +74,41 @@ spatref_wkid = 102039
 #                                                  intermediate output tiles
 #                                                  canopy_2009_Winder_Slope.tif
 #                              ...
+#        2019 Analysis/ (analysis_path)
+#                      Data/
+#                           naip_ga_2019_1m_m4b.shp (added as a layer)
+#                           snaprast.tif (snaprast_path)
+#                      Results/ (results_path)
+#                              Winder_Slope/ (physiographic region name)
+#                                           Inputs/
+#                                                  reprojected NAIP tiles
+#                                           Outputs/
+#                                                  intermediate output tiles
+#                                                  canopy_2019_Winder_Slope.tif
+#                              ...
 
-# This variable is used only in this file to define snaprast_path,
-# spatref_path, and results_path.
-project_path = 'C:/work/Research/GFC Canopy Assessment/2009 Analysis'
+# This variable specifies the path to the project root folder.
+project_path = 'C:/work/Research/GFC Canopy Assessment'
+
+# This variable specifies the format of the analysis path for one year.
+analysis_path_format = '%s/%%d Analysis' % project_path
+
+# This variable specifies the year for analysis.
+analysis_year = 2009
+
+# This variable is used only in this file to define snaprast_path and
+# results_path.
+analysis_path = analysis_path_format % analysis_year
 
 # This input/output raster is used to snap NAIP tiles to a consistent grid
 # system. If this file does not already exist, the filename part of
 # snaprast_path must be 'r' + the filename of an existing original NAIP tile so
 # that reproject_input_tiles() can automatically create it based on the folder
 # structure of the NAIP imagery data (naip_path).
-snaprast_path = '%s/Data/rm_3408504_nw_16_1_20090824.tif' % project_path
+snaprast_path = '%s/Data/rm_3408504_nw_16_1_20090824.tif' % analysis_path
 
 # This folder will contain all result files.
-results_path = '%s/Results' % project_path
+results_path = '%s/Results' % analysis_path
 
 # This list contains all physiographic region IDs, but it is not used at all.
 # reproject_input_tiles(), convert_afe_to_final_tiles(), clip_final_tiles(),
