@@ -314,6 +314,13 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
                 field = 'GT_%d' % analysis_year
                 arcpy.AddField_management(shp_path, field, 'SHORT')
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
+                # Get Cell Value reads raster at one point only. Extract
+                # Values to Points creates a new point shapefile, so we will
+                # have to run this tool multiple times for all analysis years
+                # and merge output shapefiles into one. This process may not be
+                # efficient. It would be better to manually read cell values
+                # from a numpy array.
+
             # Shapefiles require at least one field other than the ObjectID and
             # Shape fields, so we can only delete this extra unused field after
             # adding our fields first.
