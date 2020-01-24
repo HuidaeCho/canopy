@@ -21,8 +21,9 @@ We are currently planning on developing a fully open source solution without usi
 ## CanoPy Config | `canopy_config.py`
 
 Contained in `canopy_config.py` are all the data paths that `CanoPy` functions operate with.
+Example configuration can be found in `canopy_config-example.py` and copied into `canopy_config.py`
 
-**`canopy_config.py` Parameters**
+### **`canopy_config.py` Parameters**
 
 1. _**`phyregs_layer` | String**_
     * Layer containing polgon features for all physiographic regions.
