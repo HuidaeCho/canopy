@@ -18,6 +18,19 @@ Since our study is statewide, there are a large number of NAIP QQ imagery tiles&
 
 We are currently planning on developing a fully open source solution without using ArcGIS and Feature Analyst.
 
+## CanoPy Config | `canopy_config.py`
+
+Contained in `canopy_config.py` are all the data paths that `CanoPy` functions operate with.
+
+**`canopy_config.py` Input data:**
+1. `phyregs_layer`
+1. `naipqq_layer`
+1. `naipqq_phyregs_field`
+
+
+
+
+
 ## CanoPy Functions
 
 Functions contained within canopy.py
@@ -25,4 +38,5 @@ Functions contained within canopy.py
 **canopy.assign_phyregs_to_naipqq():** 
 
 No input parameters
+
 
