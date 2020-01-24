@@ -32,7 +32,7 @@ We are currently planning on developing a fully open source solution without usi
 1. ``phyreg_ids = [8, 7]`` Add physiographic region IDs to process to ``phyreg_ids``
 1. ``reproject_input_tiles(phyreg_ids)`` Reproject original NAIP QQ tiles to the target projection
 1. Run trained AFE models to classify canopy and non-canopy cells
-1. ``convert_afe_to_canopy_tiff(phyreg_ids)`` Convert AFE output tiles to the final seamless canopy TIFF file per physiographic region
+1. ``convert_afe_to_canopy_tiff(phyreg_ids)`` Convert AFE output files to the final seamless canopy TIFF file per physiographic region
 
 ## Project Team
 
