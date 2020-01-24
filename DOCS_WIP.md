@@ -137,4 +137,7 @@ Example configuration can be found in `canopy_config-example.py` and copied into
 TODO: CanoPy functions
 
 
+---
+##### Authors:
+ Owen Smith, IESA, University of North Georgia
 
