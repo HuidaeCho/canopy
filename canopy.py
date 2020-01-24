@@ -292,8 +292,6 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
     outdir_path = '%s/Results' % project_path
 
     arcpy.env.addOutputsToMap = False
-    # XXX: Overwriting can fail because of existing locks!
-    arcpy.env.overwriteOutput = True
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
 
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
