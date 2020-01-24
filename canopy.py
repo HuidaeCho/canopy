@@ -1,11 +1,11 @@
 ################################################################################
-# Name:     canopy.py
-# Purpose:  This module provides utility functions for preprocessing NAIP tiles
-#           and postprocessing trained canopy tiles.
-# Author:   Huidae Cho
-# Since:    November 29, 2019
-# Grant:    Sponsored by the Georgia Forestry Commission through the Georgia
-#           Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project
+# Name:    canopy.py
+# Purpose: This module provides utility functions for preprocessing NAIP tiles
+#          and postprocessing trained canopy tiles.
+# Author:  Huidae Cho, Ph.D., IESA, University of North Georgia
+# Since:   November 29, 2019
+# Grant:   Sponsored by the Georgia Forestry Commission through the Georgia
+#          Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project
 ################################################################################
 
 import arcpy
