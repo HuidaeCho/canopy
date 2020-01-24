@@ -1,6 +1,6 @@
 # CanoPy
 
-CanoPy is the Python module for the Georgia Canopy Analysis 2009 project sponsored by the Georgia Forestry Commission (GFC). The project grant was awarded to the Institute for Environmental and Spatial Analysis (IESA) at the University of North Georgia (UNG).
+CanoPy is the Python module for the Georgia Canopy Analysis 2009 project sponsored by the Georgia Forestry Commission (GFC). The project grant was awarded to Dr. Huidae Cho in the Institute for Environmental and Spatial Analysis (IESA) at the University of North Georgia (UNG).
 
 We developed this module to conduct the Georgia statewide canopy analysis study using the 2009 National Agriculture Imagery Program (NAIP) imagery data. Georgia comprises 24 physiographic regions for which the GFC provided a shapefile (``phyregs_layer`` in ``canopy_config-example.py``). This shapefile includes three useful fields: NAME (Text), PHYSIO_ID (Long), and AREA (Float).
 
