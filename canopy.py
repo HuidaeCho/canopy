@@ -316,4 +316,8 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
                 field = 'GT_%d' % analysis_year
                 arcpy.AddField_management(shp_path, field, 'SHORT')
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
+            # Shapefiles require at least one field other than the ObjectID and
+            # Shape fields, so we can only delete this extra unused field after
+            # adding our fields first.
+            arcpy.DeleteField_management(shp_path, 'CID')
     print('Completed.')
