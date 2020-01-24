@@ -311,7 +311,7 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
             arcpy.SelectLayerByAttribute_management(phyregs_layer,
                     where_clause="PHYSIO_ID=%d" % phyreg_id)
             arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
-                    phyregs_layer, '', count)
+                    phyregs_layer, '', point_count)
             for analysis_year in analysis_years:
                 field = 'GT_%d' % analysis_year
                 arcpy.AddField_management(shp_path, field, 'SHORT')
