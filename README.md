@@ -23,16 +23,16 @@ We are currently planning on developing a fully open source solution without usi
 1. Copy ``canopy_config-example.py`` to ``canopy_config.py``
 1. Edit ``canopy_config.py`` to recognize your folder structures and layers
 1. Start ArcMap
-1. Add Physiographic_Districts_GA.shp; its layer name is ``phyregs_layer`` in ``canopy_config.py``
-1. Add naip_ga_2009_1m_m4b.shp; its layer name is ``naipqq_layer`` in ``canopy_config.py``
+1. Add Physiographic_Districts_GA.shp. Its layer name is ``phyregs_layer`` in ``canopy_config.py``
+1. Add naip_ga_2009_1m_m4b.shp. Its layer name is ``naipqq_layer`` in ``canopy_config.py``
 1. Open the Python window from within ArcMap
-1. ``import os; os.chdir('C:/path/to/the/canopy/module')``; change the current directory to the canopy module folder
-1. ``import canopy``; import the canopy module
-1. ``assign_phyregs_to_naipqq()``; assign physiographic region IDs to the naipqq layer
-1. ``phyreg_ids = [8, 7]``; add physiographic region IDs to process to ``phyreg_ids``
-1. ``reproject_input_tiles(phyreg_ids)``; reproject original NAIP QQ tiles to the target projection
+1. ``import os; os.chdir('C:/path/to/the/canopy/module')`` Change the current directory to the canopy module folder
+1. ``import canopy`` Import the canopy module
+1. ``assign_phyregs_to_naipqq()`` Assign physiographic region IDs to the naipqq layer
+1. ``phyreg_ids = [8, 7]`` Add physiographic region IDs to process to ``phyreg_ids``
+1. ``reproject_input_tiles(phyreg_ids)`` Reproject original NAIP QQ tiles to the target projection
 1. Run trained AFE models to classify canopy and non-canopy cells
-1. ``convert_afe_to_canopy_tiff(phyreg_ids)``; convert AFE output tiles to the final seamless canopy TIFF file per physiographic region
+1. ``convert_afe_to_canopy_tiff(phyreg_ids)`` Convert AFE output tiles to the final seamless canopy TIFF file per physiographic region
 
 ## Project Team
 
