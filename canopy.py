@@ -198,7 +198,7 @@ def clip_final_tiles(phyreg_ids):
                         continue
                     if os.path.exists(frtiffile_path):
                         arcpy.SelectLayerByAttribute_management(naipqq_layer,
-                                where_clause="%s=%d" % (naipqq_oidfield, oid)
+                                where_clause="%s=%d" % (naipqq_oidfield, oid))
                         arcpy.gp.ExtractByMask_sa(frtiffile_path, naipqq_layer,
                                 cfrtiffile_path)
     print("Completed")
