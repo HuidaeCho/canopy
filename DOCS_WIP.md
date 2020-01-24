@@ -6,7 +6,7 @@ This outlines the uses and methodology of the functions contained within the Can
 
 CanoPy is the Python module for the Georgia Canopy Analysis 2009 project sponsored by the Georgia Forestry Commission (GFC). The project grant was awarded to Dr. Huidae Cho in the Institute for Environmental and Spatial Analysis (IESA) at the University of North Georgia (UNG).
 
-For further background information view the CanoPy [readme](canopy.README.md).
+For further background information view the CanoPy [readme](canopy/README.md).
 
 ## Requirements
 
