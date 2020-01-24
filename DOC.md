@@ -8,10 +8,6 @@ To assess tree canopy, we needed four bands including red (R), green (G), blue (
 
 Since our study is statewide, there are a large number of NAIP QQ imagery tiles&mdash;specifically, 3,913 GeoTIFF files across the entire Georgia&mdash;and it would not be feasible to manually pre-process these tiles before we feed them to a canopy classification algorithm. It is not only the number of input tiles, but also the number of output files that makes it challenging to complete this analysis efficiently. This module provides utility functions for pre-processing input tiles and post-processing output files to finally create the final seamless canopy raster for specified physiographic regions.
 
-## Directory
-
-[assign](#assign-phyregs-to-naipqq)
-
 ## Requirements
 
 * ArcGIS Desktop 10.x
@@ -27,8 +23,6 @@ We are currently planning on developing a fully open source solution without usi
 Functions contained within canopy.py
 
 **canopy.assign_phyregs_to_naipqq():** 
-
-(#assign-phyregs-to-naipqq)
 
 No input parameters
 
