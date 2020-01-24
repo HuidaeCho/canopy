@@ -1,6 +1,6 @@
 ################################################################################
-# Name:     canopy_config.py
-# Purpose:  This module provides configurations to the canopy.py module.
+# Name:     canopy_config-example.py
+# Purpose:  This module provides example configurations to the canopy.py module.
 # Author:   Huidae Cho
 # Since:    November 29, 2019
 # Grant:    Sponsored by the Georgia Forestry Commission through the Georgia
