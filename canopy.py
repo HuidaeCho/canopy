@@ -2,7 +2,7 @@
 # Name:    canopy.py
 # Purpose: This module provides utility functions for preprocessing NAIP tiles
 #          and postprocessing trained canopy tiles.
-# Author:  Huidae Cho, Ph.D., IESA, University of North Georgia
+# Authors: Huidae Cho, Ph.D., Owen Smith, IESA, University of North Georgia
 # Since:   November 29, 2019
 # Grant:   Sponsored by the Georgia Forestry Commission through the Georgia
 #          Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project
@@ -69,12 +69,12 @@ def reproject_input_tiles(phyreg_ids):
     phyregs_layer = canopy_config.phyregs_layer
     naipqq_layer = canopy_config.naipqq_layer
     naipqq_phyregs_field = canopy_config.naipqq_phyregs_field
+    spatref_wkid = canopy_config.spatref_wkid
     snaprast_path = canopy_config.snaprast_path
-    spatref_path = canopy_config.spatref_path
     naip_path = canopy_config.naip_path
     results_path = canopy_config.results_path
 
-    spatref = arcpy.Raster(spatref_path).spatialReference
+    spatref = arcpy.SpatialReference(spatref_wkid)
 
     arcpy.env.addOutputsToMap = False
     if not os.path.exists(snaprast_path):
@@ -273,31 +273,26 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     convert_afe_to_final_tiles(phyreg_ids)
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
-    
-def gt_point(count):
-    '''
-    This function is designed to provide randomized points for ground truthing.
 
-    The points are projected in WKID 102039: USA Contiguous Albers Equal Area
-    Conic USGS version
-	'''
-    
-    arcpy.overwriteOutputs = True
-    arcpy.env.addOutputsToMap = False
-    
-    project_path = canopy_config.project_path
+def generate_ground_truthing_points(count):
+    '''
+    This function generates randomized points for ground truthing.
+
+    count: number of random points
+    '''
     phyregs_layer = canopy_config.phyregs_layer
+    spatref_wkid = canopy_config.spatref_wkid
     results_path = canopy_config.results_path
     ind_regions = '%s/IndvidualRegions' % results_path
     ouput_folder = '%s/GroundTruth' % results_path
 
+    arcpy.overwriteOutputs = True
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
+
     regions_path = []
     names = []
 
-
-    # WKID 102039: USA Contiguous Albers Equal Area Conic USGS version
-    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(102039)
-    
     if not os.path.exists(ind_regions):
         os.makedirs(ind_regions)
         arcpy.SplitByAttributes_analysis(phyregs_layer, ind_regions, ['NAME'])
@@ -333,5 +328,3 @@ def gt_point(count):
         for i in range(24):
             arcpy.AddFields_management(in_file[i], [['GT_2009', 'TEXT'], ['GT_2015', 'TEXT']])
     print('Completed.')
-
-
