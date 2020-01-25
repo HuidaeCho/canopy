@@ -24,7 +24,7 @@ def assign_phyregs_to_naipqq():
     naipqq_layer = canopy_config.naipqq_layer
     naipqq_phyregs_field = canopy_config.naipqq_phyregs_field
 
-    fields = arcpy.ListFields(naipqq_layer)
+    fields = arcpy.ListFields(naipqq_layer, naipqq_phyregs_field)
     for field in fields:
         if field.name == naipqq_phyregs_field:
             arcpy.DeleteField_management(naipqq_layer, naipqq_phyregs_field)
