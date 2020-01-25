@@ -24,10 +24,9 @@ def assign_phyregs_to_naipqq():
     naipqq_layer = canopy_config.naipqq_layer
     naipqq_phyregs_field = canopy_config.naipqq_phyregs_field
 
-    fs = arcpy.FeatureSet(naipqq_layer)
-    fsjson = json.loads(fs.JSON)
-    for field in fsjson['fields']:
-        if field['name'] == naipqq_phyregs_field:
+    fields = arcpy.ListFields(naipqq_layer, naipqq_phyregs_field)
+    for field in fields:
+        if field.name == naipqq_phyregs_field:
             arcpy.DeleteField_management(naipqq_layer, naipqq_phyregs_field)
             break
     arcpy.AddField_management(naipqq_layer, naipqq_phyregs_field, 'TEXT',
