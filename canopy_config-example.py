@@ -22,7 +22,6 @@ phyregs_layer = 'Physiographic_Districts_GA'
 # Data source: ga_naip09qq.zip
 #              David Parry, USDA, September 30, 2019 at 9:48am
 # Required fields:
-#   FID (Object ID)
 #   FileName (Text)
 naipqq_layer = 'naip_ga_2009_1m_m4b'
 
