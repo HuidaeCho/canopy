@@ -155,7 +155,7 @@ contained within `canopy.py`.
 
 Process:
 
-This function first loads the input `naipqq_layer` in the JSON file format. 
+T 
 
     
 

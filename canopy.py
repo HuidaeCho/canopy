@@ -10,7 +10,6 @@
 
 import arcpy
 import os
-import json
 import canopy_config
 
 def assign_phyregs_to_naipqq():
