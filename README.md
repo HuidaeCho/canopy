@@ -12,7 +12,7 @@ Since our study is statewide, there are a large number of NAIP QQ imagery tiles&
 
 * ArcGIS Desktop 10.x
 * ArcPy
-* Python 2 standard modules: os, json
+* Python 2 standard module: os
 * Feature Analyst (TM) by the Textron Systems
 * Automated Feature Extraction (AFE) models trained using Feature Analyst
 
