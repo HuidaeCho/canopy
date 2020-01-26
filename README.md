@@ -21,7 +21,7 @@ We are currently planning on developing a fully open source solution without usi
 ## Usage
 
 1. Copy ``canopy_config-example.py`` to ``canopy_config.py``
-1. Edit ``canopy_config.py`` to recognize your folder structures and layers
+1. Edit ``canopy_config.py`` to recognize your layers and folder structures
 1. Start ArcMap
 1. Add Physiographic_Districts_GA.shp. Its layer name is ``phyregs_layer`` in ``canopy_config.py``
 1. Add naip_ga_2009_1m_m4b.shp. Its layer name is ``naipqq_layer`` in ``canopy_config.py``
