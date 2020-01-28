@@ -25,7 +25,7 @@ Example configuration can be found in `canopy_config-example.py` and copied into
 
 ### **`canopy_config.py` Parameters**
 
-1. ####_**`phyregs_layer` | String**_
+1. #### _**`phyregs_layer` | String**_
     * Layer containing polgon features for all physiographic regions.
     * Required attribute fields:
         * NAME (Text)
