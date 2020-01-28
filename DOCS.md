@@ -320,7 +320,7 @@ This function generates randomized points for ground truthing with fields for co
     * `project_path = canopy_config.project_path`
     * `analysis_path_format = canopy_config.analysis_path_format`
 
-* Process:
+Process:
 
 1. The physiographic regions are selected using the input physio id. 
 
