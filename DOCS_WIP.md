@@ -137,31 +137,70 @@ Example configuration can be found in `canopy_config-example.py` and copied into
 All functions designed for preproccessing NAIP imagery and for postprocessing trained/classified canopy tiles are 
 contained within `canopy.py`. 
 
+**`physregs_layer` and `naipqq_layer` must be added to open ArcMap or ArcGIS Pro dataframe for function to run.**
+
 ### **Preprocessing:** 
 
 #### _**`canopy.assign_phyregs_to_naipqq()`**_ 
-    
-    
+
+* This function adds the phyregs field to the NAIP QQ shapefile and populates
+  it with physiographic region IDs that intersect each NAIP tile.   
+
+* Parameters:
+    * None
+
 * Input data assigned with `canopy_config`:
     * `phyregs_layer = canopy_config.phyregs_layer`
     * `naipqq_layer = canopy_config.naipqq_layer`
     * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
         
-* This function adds the phyregs field to the NAIP QQ shapefile and populates
-  it with physiographic region IDs that intersect each NAIP tile.   
 
-* **`physregs_layer` and `naipqq_layer` must be added to open ArcMap or ArcGIS Pro dataframe for function to run.**
 
 
 Process:
 
-This function first loads the input `naipqq_layer` in the JSON file format. 
+1. The data fields of the input naip qq shapefile are read using `arcpy.ListFields` and a new text field titled 
+   `naip_phyregs_field` is added. If the field already exists, then it is deleted and a new field is created. 
+2. Using `arcpy.CalculateField_managment` a comma ',' is inserted into the newly created `naip_phyregs_field`. 
+   This becomes important as the format for the `naip_phyregs_field` must be ',#,#,...,' to allow for SQL statments 
+   in following functions to be able to read the `naip_phyregs_field` properly. The SQL selections will allow for 
+   the right NAIP tiles to be computed as the naip qq shapedfile has a corresponding field for file names.
+3. All selections are cleared, and now each naip qq polygon will contain the `naip_phyregs_field` filled with the 
+   ID's of physical regions that the qq tile intersects.
+   
+#### _**`canopy.reproject_input_tiles(phyreg_ids)`**_
 
+* This function reprojects and snaps the NAIP tiles that intersect selected
+  physiographic regions.
+
+* Parameters
+    * `phyreg_ids` | String : ID's of physical regions to process
+
+* Input data assigned with `canopy_config`:
+    * `phyregs_layer = canopy_config.phyregs_layer`
+    * `naipqq_layer = canopy_config.naipqq_layer`
+    * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
+    * `spatref_wkid = canopy_config.spatref_wkid`
+    * `snaprast_path = canopy_config.snaprast_path`
+    * `naip_path = canopy_config.naip_path`
+    * `results_path = canopy_config.results_path`
     
+Process:
 
+1. The spatial refernce desired is set using the WKID specified in the `canopy_config` using `arcpy.SpatialReference`  
+   which reads the WKID. 
+2. If the snap raster does not exist within the `snaprast_path` then it is created and `arcpy.env.snapRaster` is used 
+   to set all output cell alignments to match the snap.
+3. All naip tiles intersecting the input `phyreg_ids` are selected using an SQL clause to select the `phyreg_ids` then 
+   reading the file name field from each selected naip qq polygon. 
+4. Using `arcpy.ProjectRaster_managment` selected the selected NAIp are reprojected to the specified WKID and saved as outputs and the prefix 'r' 
+   is added to the file name. 
+5. The outputs of this function are what will used by Textron's Feature Analysis.
 
+### **Postprocessing:** 
 
-
+_**`canopy.convert_afe_to_final_tiles(phyreg_ids)`**_
+   
 ---
 ##### Authors:
  Owen Smith, IESA, University of North Georgia
