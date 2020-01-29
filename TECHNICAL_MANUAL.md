@@ -2,6 +2,10 @@
 
 This document outlines the uses and methodology of the functions contained within the CanoPy module.
 
+## Authors
+
+Owen Smith, IESA, University of North Georgia
+
 ## Introduction
 
 CanoPy is the Python module for the Georgia Canopy Analysis 2009 project sponsored by the Georgia Forestry Commission (GFC). The project grant was awarded to Dr. Huidae Cho in the Institute for Environmental and Spatial Analysis (IESA) at the University of North Georgia (UNG).
@@ -323,6 +327,3 @@ to utility functions are contained within `canopy.py`.
   2. Random points in each region are created using `arcpy.CreateRandomPoints`.
   3. Fields are created in each point shapefile with the header of 'GT_`analysis_years`'
   4. The values of each classified cell that contains the randomized points will be read. This will be done using a NumPy
-
-## Authors:
-Owen Smith, IESA, University of North Georgia
