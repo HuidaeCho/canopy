@@ -182,7 +182,7 @@ with physiographic region IDs that intersect each NAIP tile.
 
 Parameters: None
 
-Input data assigned with `canopy_config`:
+Config variables assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
 * `naipqq_layer = canopy_config.naipqq_layer`
 * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
@@ -210,7 +210,7 @@ physiographic regions.
 Parameters:
 * `phyreg_ids` (list of `int`): IDs of physiographic regions to process
 
-Input data assigned with `canopy_config`:
+Config variables assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
 * `naipqq_layer = canopy_config.naipqq_layer`
 * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
@@ -244,7 +244,7 @@ GeoTIFF files
 Parameters:
 * `phyreg_ids` (list of `int`): IDs of physiographic regions to process
 
-Input data assigned with `canopy_config`:
+Config variables assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
 * `naipqq_layer = canopy_config.naipqq_layer`
 * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
@@ -276,7 +276,7 @@ overlap.
 Parameters:
 * `phyreg_ids` (list of `int`): IDs of physiographic regions to process
 
-Input data assigned with `canopy_config`:
+Config variables assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
 * `naipqq_layer = canopy_config.naipqq_layer`
 * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
@@ -302,7 +302,7 @@ to their corresponding physiographic regions
 Parameters:
 * `phyreg_ids` (list of `int`): IDs of physiographic regions to process
 
-Input data assigned with `canopy_config`:
+Config variables assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
 * `naipqq_layer = canopy_config.naipqq_layer`
 * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
@@ -332,7 +332,7 @@ canopy GeoTIFF file by invoking `convert_afe_to_final_tiles()`,
 Parameters:
 * `phyreg_ids` (list of `int`): IDs of physiographic regions to process
 
-Input data assigned with `canopy_config`:
+Config variables assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
 * `naipqq_layer = canopy_config.naipqq_layer`
 * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
@@ -354,7 +354,7 @@ Parameters:
 * `analysis_years` (list of `int`): Years to add as fields
 * `point_count` (`int`): Number of randomly generate points in each region.
 
-Input data assigned with `canopy_config`:
+Config variables assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
 * `spatref_wkid = canopy_config.spatref_wkid`
 * `project_path = canopy_config.project_path`
