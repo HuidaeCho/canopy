@@ -48,7 +48,7 @@ def assign_phyregs_to_naipqq():
                 'phyreg_id': phyreg_id,
                 'area': area})
             arcpy.SelectLayerByAttribute_management(phyregs_layer,
-                    where_clause="PHYSIO_ID=%d" % phyreg_id)
+                    where_clause='PHYSIO_ID=%d' % phyreg_id)
             arcpy.SelectLayerByLocation_management(naipqq_layer,
                     select_features=phyregs_layer)
             arcpy.CalculateField_management(naipqq_layer, naipqq_phyregs_field,
@@ -56,7 +56,7 @@ def assign_phyregs_to_naipqq():
                     'PYTHON_9.3')
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
-    print("Completed")
+    print('Completed')
 
 def reproject_input_tiles(phyreg_ids):
     '''
@@ -108,7 +108,7 @@ def reproject_input_tiles(phyreg_ids):
                     if not os.path.exists(outfile_path):
                         arcpy.ProjectRaster_management(infile_path,
                                 outfile_path, spatref)
-    print("Completed")
+    print('Completed')
 
 def convert_afe_to_final_tiles(phyreg_ids):
     '''
@@ -153,7 +153,7 @@ def convert_afe_to_final_tiles(phyreg_ids):
                     elif os.path.exists(rtiffile_path):
                         arcpy.Reclassify_3d(rtiffile_path, 'Value', '1 0;2 1',
                                 frtiffile_path)
-    print("Completed")
+    print('Completed')
 
 def clip_final_tiles(phyreg_ids):
     '''
@@ -197,10 +197,10 @@ def clip_final_tiles(phyreg_ids):
                         continue
                     if os.path.exists(frtiffile_path):
                         arcpy.SelectLayerByAttribute_management(naipqq_layer,
-                                where_clause="%s=%d" % (naipqq_oidfield, oid))
+                                where_clause='%s=%d' % (naipqq_oidfield, oid))
                         arcpy.gp.ExtractByMask_sa(frtiffile_path, naipqq_layer,
                                 cfrtiffile_path)
-    print("Completed")
+    print('Completed')
 
 def mosaic_clipped_final_tiles(phyreg_ids):
     '''
@@ -261,7 +261,7 @@ def mosaic_clipped_final_tiles(phyreg_ids):
                     where_clause='PHYSIO_ID=%d' % phyreg_id)
             arcpy.gp.ExtractByMask_sa(mosaictif_path, phyregs_layer,
                     canopytif_path)
-    print("Completed")
+    print('Completed')
 
 def convert_afe_to_canopy_tiff(phyreg_ids):
     '''
@@ -306,7 +306,7 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
             shp_filename = 'gtpoints_%s.shp' % name
             shp_path = '%s/%s' % (outdir_path, shp_filename)
             arcpy.SelectLayerByAttribute_management(phyregs_layer,
-                    where_clause="PHYSIO_ID=%d" % phyreg_id)
+                    where_clause='PHYSIO_ID=%d' % phyreg_id)
             arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
                     phyregs_layer, '', point_count)
             for analysis_year in analysis_years:
@@ -328,4 +328,4 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
             # Shape fields, so we can only delete this extra unused field after
             # adding our fields first.
             arcpy.DeleteField_management(shp_path, 'CID')
-    print('Completed.')
+    print('Completed')
