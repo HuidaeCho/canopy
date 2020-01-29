@@ -253,7 +253,7 @@ Input data assigned with `canopy_config`:
 
 Process:
 1. All NAIP tiles in the desired physiographic region are first selected using
-   an  SQL statement to select the input physiographic IDs.
+   an SQL statement to select the input physiographic IDs.
 2. The filenames from the NAIP QQ shapefile with the reprojected prefix are
    used to as the outputs folder created to save the classified imagery is
    walked through.
@@ -284,9 +284,9 @@ Input data assigned with `canopy_config`:
 * `results_path = canopy_config.results_path`
 
 Process:
-1. First the `OID` field of the entire NAIP QQ shapefile is encoded.
+1. First, the `OID` field of the entire NAIP QQ shapefile is encoded.
 2. All NAIP tiles in the desired physiographic region are first selected using
-   an  SQL statement to select the input physiographic IDs.
+   an SQL statement to select the input physiographic IDs.
 3. The output files from `canopy.convert_afe_to_final_tiles` are looped over
    and using the corresponding `OID` field are then clipped to their respective
    NAIP QQ polygons.
@@ -312,7 +312,7 @@ Input data assigned with `canopy_config`:
 
 Process:
 1. All NAIP tiles in the input physiographic regions are first selected using
-   an  SQL statement to select the input physiographic IDs.
+   an SQL statement to select the input physiographic IDs.
 2. If the mosaicked file with the analysis year set by the `canopy_config` file
    exists the function ends. If no mosaiked layer with the analysis year exists
    then the process continues.
