@@ -208,7 +208,7 @@ This function reprojects and snaps the NAIP tiles that intersect selected
 physiographic regions.
 
 Parameters:
-* `phyreg_ids` (`str`): IDs of physical regions to process
+* `phyreg_ids` (list of `int`s): IDs of physiographic regions to process
 
 Input data assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
@@ -242,7 +242,7 @@ This function converts Textron's Feature Analyst classified outputs to final
 GeoTIFF files
 
 Parameters:
-* `phyreg_ids` (`str`): IDs of physical regions to process
+* `phyreg_ids` (list of `int`s): IDs of physiographic regions to process
 
 Input data assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
@@ -274,7 +274,7 @@ This function clips final tiles to their respective NAIP QQ area to eliminate
 overlap.
 
 Parameters:
-* `phyreg_ids` (`str`): IDs of physical regions to process
+* `phyreg_ids` (list of `int`s): IDs of physiographic regions to process
 
 Input data assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
@@ -300,7 +300,7 @@ This function mosaics clipped final GeoTIFF and then clips the mosaicked files
 to their corresponding physiographic regions
 
 Parameters:
-* `phyreg_ids` (`str`): IDs of physical regions to process
+* `phyreg_ids` (list of `int`s): IDs of physiographic regions to process
 
 Input data assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
@@ -330,7 +330,7 @@ canopy GeoTIFF file by invoking `convert_afe_to_final_tiles()`,
 `clip_final_tiles()`, and `mosaic_clipped_final_tiles()` in the correct order.
 
 Parameters:
-* `phyreg_ids` (`str`): IDs of physical regions to process
+* `phyreg_ids` (list of `int`s): IDs of physiographic regions to process
 
 Input data assigned with `canopy_config`:
 * `phyregs_layer = canopy_config.phyregs_layer`
@@ -350,8 +350,8 @@ This function generates randomized points for ground truthing with fields for
 corresponding analysis years.
 
 Parameters:
-* `phyreg_ids` (`str`): IDs of physical regions to process
-* `analysis_years` (`int`): Years to add as fields
+* `phyreg_ids` (list of `int`s): IDs of physiographic regions to process
+* `analysis_years` (list of `int`s): Years to add as fields
 * `point_count` (`int`): Number of randomly generate points in each region.
 
 Input data assigned with `canopy_config`:
