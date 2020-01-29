@@ -34,7 +34,7 @@ Contained in `canopy_config.py` are all the data paths that `CanoPy` functions
 operate with. Example configuration can be found in `canopy_config-example.py`
 and copied into `canopy_config.py`
 
-### `phyregs_layer`
+### `canopy_config.phyregs_layer`
 
 * Type: `str`
 * Layer containing polygon features for all physiographic regions.
@@ -44,7 +44,7 @@ and copied into `canopy_config.py`
   * `AREA` (Float)
 * Example: `phyregs_layer = 'Physiographic_Districts_GA'`
 
-### `naipqq_layer`
+### `canopy_config.naipqq_layer`
 
 * Type: `str`
 * Layer containing polygon features for all NAIP quarter quad tiles
@@ -52,7 +52,7 @@ and copied into `canopy_config.py`
     * `FileName` (Text)
 * Example: `naipqq_layer = 'naip_ga_2009_1m_m4b'`
 
-### `naipqq_phyregs_field`
+### `canopy_config.naipqq_phyregs_field`
 
 * Type: `str`
 * This output text field will be created in the naipqq layer by
@@ -62,7 +62,7 @@ and copied into `canopy_config.py`
   * Output format: (,1,2,...,)
 * Example: `naipqq_phyregs_field = 'phyregs'`
 
-### `naip_path`
+### `canopy_config.naip_path`
 
 * Type: `str`
 * Input folder in which NAIP imagery is stored.
@@ -83,7 +83,7 @@ and copied into `canopy_config.py`
   ```
 * Example: `naip_path = 'F:/Georgia/ga'`
 
-### `spatref_wkid`
+### `canopy_config.spatref_wkid`
 
 * Type: `int`
 * Takes desired output coordinate system in WKID format.
@@ -94,7 +94,7 @@ and copied into `canopy_config.py`
   Conic USGS version.
 * Example: `spatref_wkid = 102039`
 
-### `project_path`
+### `canopy_config.project_path`
 
 * Type: `str`
 * Folder path with which all other output paths are determined.
@@ -134,19 +134,19 @@ and copied into `canopy_config.py`
   Feature Analyst and is _**NOT**_ created by CanoPy.
 * Example: `project_path = 'C:/work/Research/GFC Canopy Assessment'`
 
-### `analysis_path_format`
+### `canopy_config.analysis_path_format`
 
 * Type: `str`
 * This variable specifies the format of the analysis path for one year.
 * Example: `analysis_path_format = '%s/%%d Analysis' % project_path`
 
-### `analysis_year`
+### `canopy_config.analysis_year`
 
 * Type: `int`
 * Specifies year for analysis
 * Example: `analysis_year = 2009`
 
-### `snaprast_path`
+### `canopy_config.snaprast_path`
 
 * Type: `str`
 * This input/output raster is used to snap NAIP tiles to a consistent grid
@@ -156,7 +156,7 @@ and copied into `canopy_config.py`
   the folder structure of the NAIP imagery data (`naip_path`).
 * Example: `snaprast_path = '%s/Data/rm_3408504_nw_16_1_20090824.tif' % analysis_path`
 
-### `results_path`
+### `canopy_config.results_path`
 
 * Type: `str`
 * Where all results will be stored
