@@ -198,7 +198,7 @@ Process:
    following functions to be able to read the `naip_phyregs_field` properly.
    The SQL selections will allow for the right NAIP tiles to be computed as the
    NAIP QQ shapedfile has a corresponding field for ile names.
-3. All selections are cleared, and now each NAIP QQ polygon will contain the
+3. All selections are cleared and each NAIP QQ polygon will contain the
    `naip_phyregs_field` filled with the IDs of physiographic regions that the
    QQ tile intersects.
 
