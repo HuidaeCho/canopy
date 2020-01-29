@@ -187,7 +187,7 @@ ArcGIS Pro dataframe for function to run.
   * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
 
 * Process:
-  1. The data fields of the input NAIP qq shapefile are read using
+  1. The data fields of the input NAIP QQ shapefile are read using
      `arcpy.ListFields` and a new text field titled `naip_phyregs_field` is
      added. If the field already exists, then it is deleted and a new field is
      created.
@@ -196,10 +196,10 @@ ArcGIS Pro dataframe for function to run.
      for the `naip_phyregs_field` must be ',#,#,...,' to allow for SQL
      statments in following functions to be able to read the
      `naip_phyregs_field` properly. The SQL selections will allow for the right
-     NAIP tiles to be computed as the NAIP qq shapedfile has a corresponding
+     NAIP tiles to be computed as the NAIP QQ shapedfile has a corresponding
      field for file names.
-  3. All selections are cleared, and now each NAIP qq polygon will contain the
-     `naip_phyregs_field` filled with the ID's of physical regions that the qq
+  3. All selections are cleared, and now each NAIP QQ polygon will contain the
+     `naip_phyregs_field` filled with the IDs of physical regions that the QQ
      tile intersects.
 
 #### `canopy.reproject_input_tiles(phyreg_ids)`
@@ -227,7 +227,7 @@ ArcGIS Pro dataframe for function to run.
      alignments to match the snap.
   3. All NAIP tiles intersecting the input `phyreg_ids` are selected using an
      SQL clause to select the `phyreg_ids` then reading the file name field
-     from each selected NAIP qq polygon.
+     from each selected NAIP QQ polygon.
   4. Using `arcpy.ProjectRaster_managment` selected the selected NAIp are
      reprojected to the specified WKID and saved as outputs and the prefix 'r'
      is added to the file name.
@@ -254,7 +254,7 @@ ArcGIS Pro dataframe for function to run.
 * Process:
   1. All NAIP tiles in the desired physiographic region are first selected
      using an  SQL statement to select the input physio ID.
-  2. The file names from the NAIP qq shapefile with the the reprojected prefix
+  2. The file names from the NAIP QQ shapefile with the the reprojected prefix
      are used to as the outputs folder created to save the classified imagery
      is walked through.
   3. Conversion necessary as some AFE models used in feature analysis output
@@ -269,7 +269,7 @@ ArcGIS Pro dataframe for function to run.
 
 #### `canopy.clip_final_tiles(phyreg_ids)`
 
-* This function clips final tiles to their respective NAIP qq area to eliminate
+* This function clips final tiles to their respective NAIP QQ area to eliminate
   overlap.
 
 * Parameters:
@@ -283,12 +283,12 @@ ArcGIS Pro dataframe for function to run.
   * `results_path = canopy_config.results_path`
 
 * Process:
-  1. First the `OID` field of the entire NAIP qq shapefile is encoded.
+  1. First the `OID` field of the entire NAIP QQ shapefile is encoded.
   2. All NAIP tiles in the desired physiographic region are first selected
      using an  SQL statement to select the input physio ID.
   3. The output files from `canopy.convert_afe_to_final_tiles` are looped over
      and using the corresponding `OID` field are then clipped to their
-     respective NAIP qq polygons.
+     respective NAIP QQ polygons.
   4. If the tile has already been clipped and has the appropriate prefix, then
      it will be skipped. If not then the tile will be clipped and the output
      TIFF will have the prefix 'cfr'.
