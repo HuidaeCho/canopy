@@ -28,9 +28,9 @@ Example configuration can be found in `canopy_config-example.py` and copied into
 * Type: `str`
 * Layer containing polygon features for all physiographic regions.
 * Required attribute fields:
-    * `NAME` (Text)
-    * `PHYSIO_ID` (Long)
-    * `AREA` (Float)
+  * `NAME` (Text)
+  * `PHYSIO_ID` (Long)
+  * `AREA` (Float)
 * Example: `phyregs_layer = 'Physiographic_Districts_GA'`
 
 ### `naipqq_layer`
@@ -44,9 +44,9 @@ Example configuration can be found in `canopy_config-example.py` and copied into
 ### `naipqq_phyregs_field`
 
 * Type: `str`
-* This output text field will be created in the naipqq layer by assign_phyregs_to_naipqq().
-* PHSYIO_ID's from `physregs_layer` in which a `naipqq_layer` polygon is contained are out put into this field.
-    * Output Format: (,#,#,...)
+* This output text field will be created in the naipqq layer by `canopy.assign_phyregs_to_naipqq()`.
+* `PHSYIO_ID`s from `physregs_layer` in which a `naipqq_layer` polygon is contained are out put into this field.
+  * Output format: (,1,2,...,)
 * Example: `naipqq_phyregs_field = 'phyregs'`
 
 ### `naip_path`
@@ -170,7 +170,6 @@ to utility functions are contained within `canopy.py`.
   * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
 
 * Process:
-
   1. The data fields of the input NAIP qq shapefile are read using `arcpy.ListFields` and a new text field titled
      `naip_phyregs_field` is added. If the field already exists, then it is deleted and a new field is created.
   2. Using `arcpy.CalculateField_managment` a comma ',' is inserted into the newly created `naip_phyregs_field`.
@@ -186,19 +185,18 @@ to utility functions are contained within `canopy.py`.
   physiographic regions.
 
 * Parameters:
-    * `phyreg_ids` (`str`): IDs of physical regions to process
+  * `phyreg_ids` (`str`): IDs of physical regions to process
 
 * Input data assigned with `canopy_config`:
-    * `phyregs_layer = canopy_config.phyregs_layer`
-    * `naipqq_layer = canopy_config.naipqq_layer`
-    * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
-    * `spatref_wkid = canopy_config.spatref_wkid`
-    * `snaprast_path = canopy_config.snaprast_path`
-    * `naip_path = canopy_config.naip_path`
-    * `results_path = canopy_config.results_path`
+  * `phyregs_layer = canopy_config.phyregs_layer`
+  * `naipqq_layer = canopy_config.naipqq_layer`
+  * `naipqq_phyregs_field = canopy_config.naipqq_phyregs_field`
+  * `spatref_wkid = canopy_config.spatref_wkid`
+  * `snaprast_path = canopy_config.snaprast_path`
+  * `naip_path = canopy_config.naip_path`
+  * `results_path = canopy_config.results_path`
 
 * Process:
-
   1. The spatial reference desired is set using the WKID specified in the `canopy_config` using `arcpy.SpatialReference`
      which reads the WKID.
   2. If the snap raster does not exist within the `snaprast_path` then it is created and `arcpy.env.snapRaster` is used
@@ -226,7 +224,6 @@ to utility functions are contained within `canopy.py`.
   * `results_path = canopy_config.results_path`
 
 * Process:
-
   1. All NAIP tiles in the desired physiographic region are first selected using an  SQL statement to select the input
      physio id.
   2. The file names from the NAIP qq shapefile with the the reprojected prefix are used to as the outputs folder created to
@@ -252,7 +249,6 @@ to utility functions are contained within `canopy.py`.
   * `results_path = canopy_config.results_path`
 
 * Process:
-
   1. First the `OID` field of the entire NAIP qq shapefile is encoded.
   2. All NAIP tiles in the desired physiographic region are first selected using an  SQL statement to select the input
      physio id.
@@ -261,7 +257,7 @@ to utility functions are contained within `canopy.py`.
   4. If the tile has already been clipped and has the appropriate prefix, then it will be skipped. If not then the tile
      will be clipped and the output TIFF will have the prefix 'cfr'.
 
-#### `mosaic_clipped_final_tiles(phyreg_ids)`
+#### `canopy.mosaic_clipped_final_tiles(phyreg_ids)`
 
 * This function mosaics clipped final TIFF and then clips the mosaicked files to their corresponding physiographic
   regions
@@ -278,7 +274,6 @@ to utility functions are contained within `canopy.py`.
   * `results_path = canopy_config.results_path`
 
 * Process:
-
   1. All NAIP tiles in the input physiographic regions are first selected using an  SQL statement to select the input
      physio id.
   2. If the mosaicked file with the analysis year set by the `canopy_config` file exists the function ends.
@@ -306,7 +301,7 @@ to utility functions are contained within `canopy.py`.
 
 ### Utility Functions
 
-#### `generate_ground_truthing_points(phyreg_ids, analysis_years, point_count)`
+#### `canopy.generate_ground_truthing_points(phyreg_ids, analysis_years, point_count)`
 
 * **NOTE:** This function is still a work in progress.
 
@@ -324,7 +319,6 @@ to utility functions are contained within `canopy.py`.
   * `analysis_path_format = canopy_config.analysis_path_format`
 
 * Process:
-
   1. The physiographic regions are selected using the input physio id.
   2. Random points in each region are created using `arcpy.CreateRandomPoints`.
   3. Fields are created in each point shapefile with the header of 'GT_`analysis_years`'
