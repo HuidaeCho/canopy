@@ -70,8 +70,8 @@ spatref_wkid = 102039
 #                                           Inputs/
 #                                                  reprojected NAIP tiles
 #                                           Outputs/
-#                                                  intermediate output tiles
-#                                                  canopy_2009_Winder_Slope.tif
+#                                                   intermediate output tiles
+#                                                   canopy_2009_Winder_Slope.tif
 #                              ...
 #        2019 Analysis/ (analysis_path)
 #                      Data/
@@ -82,8 +82,8 @@ spatref_wkid = 102039
 #                                           Inputs/
 #                                                  reprojected NAIP tiles
 #                                           Outputs/
-#                                                  intermediate output tiles
-#                                                  canopy_2019_Winder_Slope.tif
+#                                                   intermediate output tiles
+#                                                   canopy_2019_Winder_Slope.tif
 #                              ...
 
 # This variable specifies the path to the project root folder.
