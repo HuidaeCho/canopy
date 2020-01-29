@@ -157,16 +157,16 @@ to utility functions are contained within `canopy.py`.
 
 
 
-Process:
+* Process:
 
-1. The data fields of the input NAIP qq shapefile are read using `arcpy.ListFields` and a new text field titled 
-   `naip_phyregs_field` is added. If the field already exists, then it is deleted and a new field is created. 
-2. Using `arcpy.CalculateField_managment` a comma ',' is inserted into the newly created `naip_phyregs_field`. 
-   This becomes important as the format for the `naip_phyregs_field` must be ',#,#,...,' to allow for SQL statments 
-   in following functions to be able to read the `naip_phyregs_field` properly. The SQL selections will allow for 
-   the right NAIP tiles to be computed as the NAIP qq shapedfile has a corresponding field for file names.
-3. All selections are cleared, and now each NAIP qq polygon will contain the `naip_phyregs_field` filled with the 
-   ID's of physical regions that the qq tile intersects.
+   1. The data fields of the input NAIP qq shapefile are read using `arcpy.ListFields` and a new text field titled 
+      `naip_phyregs_field` is added. If the field already exists, then it is deleted and a new field is created. 
+   2. Using `arcpy.CalculateField_managment` a comma ',' is inserted into the newly created `naip_phyregs_field`. 
+      This becomes important as the format for the `naip_phyregs_field` must be ',#,#,...,' to allow for SQL statments 
+      in following functions to be able to read the `naip_phyregs_field` properly. The SQL selections will allow for 
+      the right NAIP tiles to be computed as the NAIP qq shapedfile has a corresponding field for file names.
+   3. All selections are cleared, and now each NAIP qq polygon will contain the `naip_phyregs_field` filled with the 
+      ID's of physical regions that the qq tile intersects.
    
 #### _**`canopy.reproject_input_tiles(phyreg_ids)`**_
 
@@ -185,17 +185,17 @@ Process:
     * `naip_path = canopy_config.naip_path`
     * `results_path = canopy_config.results_path`
     
-Process:
+* Process:
 
-1. The spatial reference desired is set using the WKID specified in the `canopy_config` using `arcpy.SpatialReference`  
+   1. The spatial reference desired is set using the WKID specified in the `canopy_config` using `arcpy.SpatialReference`  
    which reads the WKID. 
-2. If the snap raster does not exist within the `snaprast_path` then it is created and `arcpy.env.snapRaster` is used 
+   2. If the snap raster does not exist within the `snaprast_path` then it is created and `arcpy.env.snapRaster` is used 
    to set all output cell alignments to match the snap.
-3. All NAIP tiles intersecting the input `phyreg_ids` are selected using an SQL clause to select the `phyreg_ids` then 
+   3. All NAIP tiles intersecting the input `phyreg_ids` are selected using an SQL clause to select the `phyreg_ids` then 
    reading the file name field from each selected NAIP qq polygon. 
-4. Using `arcpy.ProjectRaster_managment` selected the selected NAIp are reprojected to the specified WKID and saved as outputs and the prefix 'r' 
-   is added to the file name. 
-5. The outputs of this function are saved in an inputs folder and are what will used by Textron's Feature Analysis.
+   4. Using `arcpy.ProjectRaster_managment` selected the selected NAIp are reprojected to the specified WKID and saved as outputs and       
+      the prefix 'r' is added to the file name. 
+   5. The outputs of this function are saved in an inputs folder and are what will used by Textron's Feature Analysis.
 
 ### **Postprocessing:** 
 
@@ -213,17 +213,17 @@ Process:
     * `snaprast_path = canopy_config.snaprast_path`
     * `results_path = canopy_config.results_path`
 
-Process: 
+* Process: 
 
-1. All NAIP tiles in the desired physiographic region are first selected using an  SQL statement to select the input 
-   physio id.
-2. The file names from the NAIP qq shapefile with the the reprojected prefix are used to as the outputs folder created to 
-   save the classified imagery is walked through.
-3. Conversion necessary as some AFE models used in feature analysis output TIFF files and some output shapefiles.
-    1. If the file is a shapefile then it is converted to raster with classes 1 and 0.
-    1. if the file is a TIFF file is the values are reclassified from 1 to 0 and 2 to 1. 
-    1. If the file has already run through this function and has the appropriate prefix then nothing happens to it.
-4. Outputs are saved in the outputs folder with the prefix 'fr'.
+   1. All NAIP tiles in the desired physiographic region are first selected using an  SQL statement to select the input 
+      physio id.
+   2. The file names from the NAIP qq shapefile with the the reprojected prefix are used to as the outputs folder created to 
+      save the classified imagery is walked through.
+   3. Conversion necessary as some AFE models used in feature analysis output TIFF files and some output shapefiles.
+      1. If the file is a shapefile then it is converted to raster with classes 1 and 0.
+      1. if the file is a TIFF file is the values are reclassified from 1 to 0 and 2 to 1. 
+      1. If the file has already run through this function and has the appropriate prefix then nothing happens to it.
+   4. Outputs are saved in the outputs folder with the prefix 'fr'.
 
 #### _**`canopy.clip_final_tiles(phyreg_ids)`**_
 
@@ -241,16 +241,16 @@ Process:
 
 * Process:
 
-1. First the `OID` field of the entire NAIP qq shapefile is encoded. 
+   1. First the `OID` field of the entire NAIP qq shapefile is encoded. 
 
-2. All NAIP tiles in the desired physiographic region are first selected using an  SQL statement to select the input 
-   physio id.
+   2. All NAIP tiles in the desired physiographic region are first selected using an  SQL statement to select the input 
+      physio id.
 
-3. The output files from `canopy.convert_afe_to_final_tiles` are looped over and using the corresponding `OID` field 
-   are then clipped to their respective NAIP qq polygons. 
+   3. The output files from `canopy.convert_afe_to_final_tiles` are looped over and using the corresponding `OID` field 
+      are then clipped to their respective NAIP qq polygons. 
    
-4. If the tile has already been clipped and has the appropriate prefix, then it will be skipped. If not then the tile
-   will be clipped and the output TIFF will have the prefix 'cfr'.
+   4. If the tile has already been clipped and has the appropriate prefix, then it will be skipped. If not then the tile
+      will be clipped and the output TIFF will have the prefix 'cfr'.
 
 #### _**`mosaic_clipped_final_tiles(phyreg_ids)`**_
 
@@ -270,18 +270,18 @@ Process:
 
 * Process:
 
-1. All NAIP tiles in the input physiographic regions are first selected using an  SQL statement to select the input 
-   physio id.
+   1. All NAIP tiles in the input physiographic regions are first selected using an  SQL statement to select the input 
+      physio id.
 
-2. If the mosaicked file with the analysis year set by the `canopy_config` file exists the function ends.
-   If no mosaiked layer with the analysis year exists then the process continues.
+   2. If the mosaicked file with the analysis year set by the `canopy_config` file exists the function ends.
+      If no mosaiked layer with the analysis year exists then the process continues.
    
-3. Input tiles to be mosiacked are products from `canopy.clip_final_tiles` with the prefix 'cfr'. 
+   3. Input tiles to be mosiacked are products from `canopy.clip_final_tiles` with the prefix 'cfr'. 
 
-4. Mosiacking occurs using `arcpy.MosaicToNewRaster` to create the output raster as a new 2 bit TIF file.
+   4. Mosiacking occurs using `arcpy.MosaicToNewRaster` to create the output raster as a new 2 bit TIF file.
 
-5. The new mosaiked data set is clipped to the outline of the physiographic region with the corresponding physiographic
-   id.
+   5. The new mosaiked data set is clipped to the outline of the physiographic region with the corresponding physiographic
+      id.
  
    
 #### _**`canopy.convert_afe_to_canopy_tif(phyreg_ids)`**_
@@ -320,15 +320,15 @@ This function generates randomized points for ground truthing with fields for co
     * `project_path = canopy_config.project_path`
     * `analysis_path_format = canopy_config.analysis_path_format`
 
-Process:
+* Process:
 
-1. The physiographic regions are selected using the input physio id. 
+   1. The physiographic regions are selected using the input physio id. 
 
-2. Random points in each region are created using `arcpy.CreateRandomPoints`.
+   2. Random points in each region are created using `arcpy.CreateRandomPoints`.
 
-3. Fields are created in each point shapefile with the header of 'GT_`analysis_years`'
+   3. Fields are created in each point shapefile with the header of 'GT_`analysis_years`'
 
-4. The values of each classified cell that contains the randomized points will be read. This will be done using a NumPy 
+   4. The values of each classified cell that contains the randomized points will be read. This will be done using a NumPy 
 
 
 
