@@ -5,7 +5,8 @@ within the CanoPy module.
 
 ## Authors
 
-Owen Smith, IESA, University of North Georgia
+Owen Smith, Institute for Environmental and Spatial Analysis, University of
+North Georgia
 
 ## Introduction
 
