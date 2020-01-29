@@ -192,12 +192,12 @@ Process:
    `arcpy.ListFields` and a new text field titled `naip_phyregs_field` is
    added. If the field already exists, then it is deleted and a new field is
    created.
-2. Using `arcpy.CalculateField_managment` a comma `,` is inserted into the
-   newly created `naip_phyregs_field`. This becomes important as the format
-   for the `naip_phyregs_field` must be `,#,#,...,` to allow for SQL statments
-   in following functions to be able to read the `naip_phyregs_field` properly.
+2. Using `arcpy.CalculateField_managment`, a comma (`,`) is inserted into the
+   newly created `naip_phyregs_field`. This becomes important as the format for
+   the `naip_phyregs_field` must be `,#,#,...,` to allow for SQL statments in
+   following functions to be able to read the `naip_phyregs_field` properly.
    The SQL selections will allow for the right NAIP tiles to be computed as the
-   NAIP QQ shapedfile has a corresponding field for file names.
+   NAIP QQ shapedfile has a corresponding field for ile names.
 3. All selections are cleared, and now each NAIP QQ polygon will contain the
    `naip_phyregs_field` filled with the IDs of physical regions that the QQ
    tile intersects.
@@ -226,11 +226,11 @@ Process:
    created and `arcpy.env.snapRaster` is used to set all output cell alignments
    to match the snap.
 3. All NAIP tiles intersecting the input `phyreg_ids` are selected using an SQL
-   clause to select the `phyreg_ids` then reading the file name field from each
+   clause to select the `phyreg_ids` then reading the filename field from each
    selected NAIP QQ polygon.
 4. Using `arcpy.ProjectRaster_managment` selected the selected NAIp are
    reprojected to the specified WKID and saved as outputs and the prefix `r`
-   (**r**eprojected) is added to the file name.
+   (**r**eprojected) is added to the filename.
 5. The outputs of this function are saved in an inputs folder and are what will
    used by Textron's Feature Analysis.
 
@@ -254,7 +254,7 @@ Input data assigned with `canopy_config`:
 Process:
 1. All NAIP tiles in the desired physiographic region are first selected using
    an  SQL statement to select the input physiographic IDs.
-2. The file names from the NAIP QQ shapefile with the reprojected prefix are
+2. The filenames from the NAIP QQ shapefile with the reprojected prefix are
    used to as the outputs folder created to save the classified imagery is
    walked through.
 3. Conversion necessary as some AFE models used in feature analysis output
