@@ -55,37 +55,37 @@ naip_path = 'F:/Georgia/ga'
 spatref_wkid = 102039
 
 # The default structure of the project folder is defined as follows:
-# C:/.../ (project_path)
-#        Data/
-#             Physiographic_Districts_GA.shp (added as a layer)
-#        Results/
-#                gtpoints_Winder_Slope.shp
-#                ...
-#        2009 Analysis/ (analysis_path)
-#                      Data/
-#                           naip_ga_2009_1m_m4b.shp (added as a layer)
-#                           snaprast.tif (snaprast_path)
-#                      Results/ (results_path)
-#                              Winder_Slope/ (physiographic region name)
-#                                           Inputs/
-#                                                  reprojected NAIP tiles
-#                                           Outputs/
-#                                                   intermediate output tiles
-#                                                   canopy_2009_Winder_Slope.tif
-#                              ...
-#        2019 Analysis/ (analysis_path)
-#                      Data/
-#                           naip_ga_2019_1m_m4b.shp (added as a layer)
-#                           snaprast.tif (snaprast_path)
-#                      Results/ (results_path)
-#                              Winder_Slope/ (physiographic region name)
-#                                           Inputs/
-#                                                  reprojected NAIP tiles
-#                                           Outputs/
-#                                                   intermediate output tiles
-#                                                   canopy_2019_Winder_Slope.tif
-#                              ...
-#        ...
+#   C:/.../ (project_path)
+#          Data/
+#               Physiographic_Districts_GA.shp (added as a layer)
+#          Results/
+#                  gtpoints_Winder_Slope.shp
+#                  ...
+#          2009 Analysis/ (analysis_path)
+#                        Data/
+#                             naip_ga_2009_1m_m4b.shp (added as a layer)
+#                             snaprast.tif (snaprast_path)
+#                        Results/ (results_path)
+#                                Winder_Slope/ (physiographic region name)
+#                                             Inputs/
+#                                                    reprojected NAIP tiles
+#                                             Outputs/
+#                                                     intermediate output tiles
+#                                                     canopy_2009_Winder_Slope.tif
+#                                ...
+#          2019 Analysis/ (analysis_path)
+#                        Data/
+#                             naip_ga_2019_1m_m4b.shp (added as a layer)
+#                             snaprast.tif (snaprast_path)
+#                        Results/ (results_path)
+#                                Winder_Slope/ (physiographic region name)
+#                                             Inputs/
+#                                                    reprojected NAIP tiles
+#                                             Outputs/
+#                                                     intermediate output tiles
+#                                                     canopy_2019_Winder_Slope.tif
+#                                ...
+#          ...
 
 # This variable specifies the path to the project root folder.
 project_path = 'C:/work/Research/GFC Canopy Assessment'
