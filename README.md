@@ -26,7 +26,7 @@ We are currently planning on developing a fully open source solution without usi
 1. Add Physiographic_Districts_GA.shp. Its layer name is ``phyregs_layer`` in ``canopy_config.py``
 1. Add naip_ga_2009_1m_m4b.shp. Its layer name is ``naipqq_layer`` in ``canopy_config.py``
 1. Open the Python window from within ArcMap
-1. ``import os; os.chdir('C:/path/to/the/canopy/module')`` Change the current directory to the canopy module folder
+1. ``import os; os.chdir('C:/path/to/the/canopy/module') OR import sys; sys.path.append('C:/path/to/the/canopy/module')`` Change the current directory to the canopy module folder
 1. ``import canopy`` Import the canopy module
 1. ``assign_phyregs_to_naipqq()`` Assign physiographic region IDs to the naipqq layer
 1. ``phyreg_ids = [8, 7]`` Add physiographic region IDs to process to ``phyreg_ids``
