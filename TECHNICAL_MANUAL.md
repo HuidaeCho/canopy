@@ -253,10 +253,10 @@ ArcGIS Pro dataframe for function to run.
 
 * Process:
   1. All NAIP tiles in the desired physiographic region are first selected
-     using an  SQL statement to select the input physio ID.
-  2. The file names from the NAIP QQ shapefile with the the reprojected prefix
-     are used to as the outputs folder created to save the classified imagery
-     is walked through.
+     using an  SQL statement to select the input physiographic IDs.
+  2. The file names from the NAIP QQ shapefile with the reprojected prefix are
+     used to as the outputs folder created to save the classified imagery is
+     walked through.
   3. Conversion necessary as some AFE models used in feature analysis output
      TIFF files and some output shapefiles.
      1. If the file is a shapefile then it is converted to raster with classes
@@ -285,7 +285,7 @@ ArcGIS Pro dataframe for function to run.
 * Process:
   1. First the `OID` field of the entire NAIP QQ shapefile is encoded.
   2. All NAIP tiles in the desired physiographic region are first selected
-     using an  SQL statement to select the input physio ID.
+     using an  SQL statement to select the input physiographic IDs.
   3. The output files from `canopy.convert_afe_to_final_tiles` are looped over
      and using the corresponding `OID` field are then clipped to their
      respective NAIP QQ polygons.
@@ -311,7 +311,7 @@ ArcGIS Pro dataframe for function to run.
 
 * Process:
   1. All NAIP tiles in the input physiographic regions are first selected using
-     an  SQL statement to select the input physio ID.
+     an  SQL statement to select the input physiographic IDs.
   2. If the mosaicked file with the analysis year set by the `canopy_config`
      file exists the function ends.  If no mosaiked layer with the analysis
      year exists then the process continues.
@@ -361,7 +361,7 @@ ArcGIS Pro dataframe for function to run.
   * `analysis_path_format = canopy_config.analysis_path_format`
 
 * Process:
-  1. The physiographic regions are selected using the input physio ID.
+  1. The physiographic regions are selected using the input physiographic IDs.
   2. Random points in each region are created using `arcpy.CreateRandomPoints`.
   3. Fields are created in each point shapefile with the header of
      'GT_`analysis_years`'
