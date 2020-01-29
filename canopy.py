@@ -10,6 +10,7 @@
 
 import arcpy
 import os
+import numpy
 import canopy_config
 
 def assign_phyregs_to_naipqq():
@@ -311,6 +312,10 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
             for analysis_year in analysis_years:
                 field = 'GT_%d' % analysis_year
                 arcpy.AddField_management(shp_path, field, 'SHORT')
+                canopy_raster = arcpy.sa.Raster('Input canopy_YEAR_PHYREG')
+                new_array = arcpy.RasterToNumPyArray(canopy_raster)
+
+                
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
                 # Values to Points creates a new point shapefile, so we will
