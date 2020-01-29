@@ -5,8 +5,7 @@ within the CanoPy module.
 
 ## Authors
 
-Owen Smith, Institute for Environmental and Spatial Analysis, University of
-North Georgia
+Owen Smith, IESA, University of North Georgia
 
 ## Introduction
 
@@ -15,7 +14,7 @@ sponsored by the Georgia Forestry Commission (GFC). The project grant was
 awarded to Dr. Huidae Cho in the Institute for Environmental and Spatial
 Analysis (IESA) at the University of North Georgia (UNG).
 
-For further background information view the CanoPy [README](README.md).
+For further background information, view the CanoPy [README](README.md).
 
 ## Requirements
 
@@ -130,6 +129,7 @@ module.
                                                     intermediate output tiles
                                                     canopy_2019_Winder_Slope.tif
                                ...
+         ...
   ```
 * **NOTE:** Output folder must be manually created. It is used when running
   Feature Analyst and is _**NOT**_ created by CanoPy.

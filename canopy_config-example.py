@@ -85,6 +85,7 @@ spatref_wkid = 102039
 #                                                   intermediate output tiles
 #                                                   canopy_2019_Winder_Slope.tif
 #                              ...
+#        ...
 
 # This variable specifies the path to the project root folder.
 project_path = 'C:/work/Research/GFC Canopy Assessment'
