@@ -190,7 +190,7 @@ Config variables assigned with `canopy_config`:
 Process:
 1. The data fields of the input NAIP QQ shapefile are read using
    `arcpy.ListFields` and a new text field titled `naip_phyregs_field` is
-   added. If the field already exists, then it is deleted and a new field is
+   added. If the field already exists, it is deleted and a new field is
    created.
 2. Using `arcpy.CalculateField_managment`, a comma (`,`) is inserted into the
    newly created `naip_phyregs_field`. This becomes important as the format for
@@ -222,16 +222,16 @@ Config variables assigned with `canopy_config`:
 Process:
 1. The spatial reference desired is set using the WKID specified in the
    `canopy_config` using `arcpy.SpatialReference` which reads the WKID.
-2. If the snap raster does not exist within the `snaprast_path` then it is
-   created and `arcpy.env.snapRaster` is used to set all output cell alignments
-   to match the snap.
+2. If the snap raster does not exist within the `snaprast_path`, it is created
+   and `arcpy.env.snapRaster` is used to set all output cell alignments to
+   match the snap.
 3. All NAIP tiles intersecting the input `phyreg_ids` are selected using an SQL
-   clause to select the `phyreg_ids` then reading the filename field from each
-   selected NAIP QQ polygon.
-4. Using `arcpy.ProjectRaster_managment` selected the selected NAIp are
-   reprojected to the specified WKID and saved as outputs and the prefix `r`
-   (**r**eprojected) is added to the filename.
-5. The outputs of this function are saved in an inputs folder and are what will
+   clause to select the `phyreg_ids`.
+4. The `FileName` field from each selected NAIP QQ polygon is read.
+5. Using `arcpy.ProjectRaster_managment`, the selected NAIP are reprojected to
+   the specified WKID and saved as outputs and the prefix `r` (**r**eprojected)
+   is added to the filename.
+6. The outputs of this function are saved in an inputs folder and are what will
    used by Textron's Feature Analysis.
 
 ### Postprocessing
@@ -257,14 +257,14 @@ Process:
 2. The filenames from the NAIP QQ shapefile with the reprojected prefix are
    used to as the outputs folder created to save the classified imagery is
    walked through.
-3. Conversion necessary as some AFE models used in feature analysis output
+3. Conversion is necessary as some AFE models used in feature analysis output
    GeoTIFF files and some output shapefiles.
-   1. If the file is a shapefile then it is converted to raster with classes 1
-      and 0.
-   2. if the file is a GeoTIFF file is the values are reclassified from 1 to 0
+   1. If the file is a shapefile, it is converted to raster with classes 1 and
+      0.
+   2. If the file is a GeoTIFF file, the values are reclassified from 1 to 0
       and 2 to 1.
    3. If the file has already run through this function and has the appropriate
-      prefix then nothing happens to it.
+      prefix, nothing happens to it.
 4. Outputs are saved in the outputs folder with the prefix `fr` (**f**inal
    **r**eprojected).
 
@@ -288,11 +288,11 @@ Process:
 2. All NAIP tiles in the desired physiographic region are first selected using
    an SQL statement to select the input physiographic IDs.
 3. The output files from `canopy.convert_afe_to_final_tiles` are looped over
-   and using the corresponding `OID` field are then clipped to their respective
-   NAIP QQ polygons.
-4. If the tile has already been clipped and has the appropriate prefix, then it
-   will be skipped. If not then the tile will be clipped and the output GeoTIFF
-   will have the prefix `cfr` (**c**lipped **f**inal **r**eprojected).
+   and, using the corresponding `OID` field, are then clipped to their
+   respective NAIP QQ polygons.
+4. If the tile has already been clipped and has the appropriate prefix, it will
+   be skipped. If not, the tile will be clipped and the output GeoTIFF will
+   have the prefix `cfr` (**c**lipped **f**inal **r**eprojected).
 
 #### `canopy.mosaic_clipped_final_tiles(phyreg_ids)`
 
@@ -314,8 +314,8 @@ Process:
 1. All NAIP tiles in the input physiographic regions are first selected using
    an SQL statement to select the input physiographic IDs.
 2. If the mosaicked file with the analysis year set by the `canopy_config` file
-   exists the function ends. If no mosaiked layer with the analysis year exists
-   then the process continues.
+   exists, the function ends. If no mosaiked layer with the analysis year
+   exists, the process continues.
 3. Input tiles to be mosiacked are products from `canopy.clip_final_tiles` with
    the prefix `cfr`.
 4. Mosiacking occurs using `arcpy.MosaicToNewRaster` to create the output
