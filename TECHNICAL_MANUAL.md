@@ -363,7 +363,7 @@ Input data assigned with `canopy_config`:
 Process:
 1. The physiographic regions are selected using the input physiographic IDs.
 2. Random points in each region are created using `arcpy.CreateRandomPoints`.
-3. Fields are created in each point shapefile with the header of
+3. Fields are created in each point shapefile with the field name of
    `GT_{analysis_year}` (e.g., `GT_2009`).
 4. The values of each classified cell that contains the randomized points will
    be read. This task will be implemented using the NumPy module.
