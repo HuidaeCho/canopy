@@ -275,7 +275,8 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
+def generate_ground_truthing_points(phyreg_ids, analysis_years,
+                                     point_density=None):
     '''
     This function generates randomized points for ground truthing.
 
@@ -295,7 +296,8 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
 
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
             where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
-    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID', 'AREA']) \
+            as cur:
         for row in cur:
             name = row[0]
             print(name)
@@ -307,15 +309,20 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_count):
             shp_path = '%s/%s' % (outdir_path, shp_filename)
             arcpy.SelectLayerByAttribute_management(phyregs_layer,
                     where_clause='PHYSIO_ID=%d' % phyreg_id)
+            metersPerUnit = arcpy.Describe(
+                phyregs_layer).spatialReference.metersPerUnit
+            point_density *= metersPerUnit**2
+            area = row[2]
+            area *= metersPerUnit**2
+            point_count = area * point_density
             arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
                     phyregs_layer, '', point_count)
             for analysis_year in analysis_years:
-                field = 'GT_%d' % analysis_year
+                field = 'GT_%s' % analysis_year
                 arcpy.AddField_management(shp_path, field, 'SHORT')
                 canopy_raster = arcpy.sa.Raster('Input canopy_YEAR_PHYREG')
                 new_array = arcpy.RasterToNumPyArray(canopy_raster)
 
-                
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
                 # Values to Points creates a new point shapefile, so we will
