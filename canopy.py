@@ -275,8 +275,8 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def generate_ground_truthing_points(phyreg_ids, analysis_years,
-                                     point_density=None):
+def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
+                                    max_points, min_points=0):
     '''
     This function generates randomized points for ground truthing.
 
@@ -315,6 +315,12 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
             area = row[2]
             area *= metersPerUnit**2
             point_count = area * point_density
+            if point_count < min_points:
+                del point_count
+                point_count = min_points
+            if point_count > max_points:
+                del point_count
+                point_count = max_points
             arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
                     phyregs_layer, '', point_count)
             for analysis_year in analysis_years:
