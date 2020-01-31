@@ -1,7 +1,9 @@
 # CanoPy
 
 CanoPy is the Python module for the Georgia Canopy Analysis 2009 project
-sponsored by the Georgia Forestry Commission (GFC).
+sponsored by the Georgia Forestry Commission (GFC). For more details about this
+project including the technical manual, please visit [its wiki
+page](https://gislab.isnew.info/canopy).
 
 ## Requirements
 
@@ -57,26 +59,14 @@ using ArcGIS and Feature Analyst.
    canopy.convert_afe_to_canopy_tiff(phyreg_ids)
    ```
 
-## Project Team
+## Project team
 
 * Huidae Cho, Ph.D., Assistant Professor of Geospatial Science and Computing,
   IESA, UNG
-  * Principal investigator
-  * Python development
 * Jennifer McCollum, Undergraduate Student, IESA, UNG
-  * Research about Feature Analyst
-  * Literature review
-  * Documentation
 * Owen Smith, Undergraduate Student, IESA, UNG
-  * Python development
-  * Technical documentation
 
 ## Acknowledgement
-
-This work was supported by the Georgia Forestry Commission through the Georgia
-Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project grant.
-
-## Grant Disclaimer
 
 The work upon which this software is based was funded in whole or in part
 through an Urban and Community Forestry grant awarded by the Southern Region,
