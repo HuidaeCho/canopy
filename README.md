@@ -59,7 +59,7 @@ using ArcGIS and Feature Analyst.
    canopy.convert_afe_to_canopy_tiff(phyreg_ids)
    ```
 
-## Project Team
+## Project team
 
 * Huidae Cho, Ph.D., Assistant Professor of Geospatial Science and Computing,
   IESA, UNG
@@ -71,7 +71,7 @@ using ArcGIS and Feature Analyst.
 This work was supported by the Georgia Forestry Commission through the Georgia
 Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project grant.
 
-## Grant Disclaimer
+## Grant disclaimer
 
 The work upon which this software is based was funded in whole or in part
 through an Urban and Community Forestry grant awarded by the Southern Region,
