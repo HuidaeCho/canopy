@@ -109,4 +109,7 @@ Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project grant.
 
 ## Grant Disclaimer
 
-The work upon which this software is based was funded in whole or in part through an Urban and Community Forestry grant awarded by the Southern Region, State and Private Forestry, U.S. Forest Service and administered by the Georgia Forestry Commission.
+The work upon which this software is based was funded in whole or in part
+through an Urban and Community Forestry grant awarded by the Southern Region,
+State and Private Forestry, U.S. Forest Service and administered by the Georgia
+Forestry Commission.
