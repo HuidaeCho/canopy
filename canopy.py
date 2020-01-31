@@ -276,7 +276,7 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     mosaic_clipped_final_tiles(phyreg_ids)
 
 def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
-                                    max_points, min_points=0):
+                                    max_points=999, min_points=0):
     '''
     This function generates randomized points for ground truthing.
 
@@ -314,7 +314,8 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
             point_density *= metersPerUnit**2
             area = row[2]
             area *= metersPerUnit**2
-            point_count = area * point_density
+            point_count = point_density * area
+            print(point_count)
             if point_count < min_points:
                 del point_count
                 point_count = min_points
@@ -323,22 +324,5 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
                 point_count = max_points
             arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
                     phyregs_layer, '', point_count)
-            for analysis_year in analysis_years:
-                field = 'GT_%s' % analysis_year
-                arcpy.AddField_management(shp_path, field, 'SHORT')
-                canopy_raster = arcpy.sa.Raster('Input canopy_YEAR_PHYREG')
-                new_array = arcpy.RasterToNumPyArray(canopy_raster)
 
-                # TODO: Read cell values from canopy_YEAR_PHYREG.tif
-                # Get Cell Value reads raster at one point only. Extract
-                # Values to Points creates a new point shapefile, so we will
-                # have to run this tool multiple times for all analysis years
-                # and merge output shapefiles into one. This process may not be
-                # efficient. It would be better to manually read cell values
-                # from a numpy array.
-
-            # Shapefiles require at least one field other than the ObjectID and
-            # Shape fields, so we can only delete this extra unused field after
-            # adding our fields first.
-            arcpy.DeleteField_management(shp_path, 'CID')
     print('Completed')
