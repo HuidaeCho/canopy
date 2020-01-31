@@ -59,18 +59,17 @@ using ArcGIS and Feature Analyst.
 
 ## Project Team
 
-Huidae Cho, Ph.D., Assistant Professor of Geospatial Science and Computing, IESA, UNG
-* Principal investigator
-* Python development
-
-Jennifer McCollum, Undergraduate Student, IESA, UNG
-* Research about Feature Analyst
-* Literature review
-* Documentation
-
-Owen Smith, Undergraduate Student, IESA, UNG
-* Python development
-* Technical documentation
+* Huidae Cho, Ph.D., Assistant Professor of Geospatial Science and Computing,
+  IESA, UNG
+  * Principal investigator
+  * Python development
+* Jennifer McCollum, Undergraduate Student, IESA, UNG
+  * Research about Feature Analyst
+  * Literature review
+  * Documentation
+* Owen Smith, Undergraduate Student, IESA, UNG
+  * Python development
+  * Technical documentation
 
 ## Acknowledgement
 
