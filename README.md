@@ -1,7 +1,9 @@
 # CanoPy
 
 CanoPy is the Python module for the Georgia Canopy Analysis 2009 project
-sponsored by the Georgia Forestry Commission (GFC).
+sponsored by the Georgia Forestry Commission (GFC). For more details about this
+project including the technical manual, please visit [its wiki
+page](https://gislab.isnew.info/canopy).
 
 ## Requirements
 
