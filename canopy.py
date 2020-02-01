@@ -288,6 +288,7 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
     spatref_wkid = canopy_config.spatref_wkid
     project_path = canopy_config.project_path
     analysis_path_format = canopy_config.analysis_path_format
+    snap_raster = canopy_config.snaprast_path
 
     outdir_path = '%s/Results' % project_path
 
@@ -324,5 +325,24 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
                 point_count = max_points
             arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
                     phyregs_layer, '', point_count)
+            for analysis_year in analysis_years:
+                field = 'GT_%s' % analysis_year
+                arcpy.AddField_management(shp_path, field, 'SHORT')
+                canopy_raster = arcpy.sa.Raster(snap_raster)
+                raster_array = arcpy.RasterToNumPyArray(canopy_raster)
+                rows, cols = raster_array.shape
+
+                # TODO: Read cell values from canopy_YEAR_PHYREG.tif
+                # Get Cell Value reads raster at one point only. Extract
+                # Values to Points creates a new point shapefile, so we will
+                # have to run this tool multiple times for all analysis years
+                # and merge output shapefiles into one. This process may not be
+                # efficient. It would be better to manually read cell values
+                # from a numpy array.
+
+            # Shapefiles require at least one field other than the ObjectID and
+            # Shape fields, so we can only delete this extra unused field after
+            # adding our fields first.
+            arcpy.DeleteField_management(shp_path, 'CID')
 
     print('Completed')
