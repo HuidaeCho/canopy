@@ -1,6 +1,7 @@
 ################################################################################
-# Name:    canopy.py # Purpose: This module provides utility functions for 
-#          preprocessing NAIP tiles and postprocessing trained canopy tiles. 
+# Name:    canopy.py 
+# Purpose: This module provides utility functions for preprocessing NAIP tiles 
+#          and postprocessing trained canopy tiles. 
 # Authors: Huidae Cho, Ph.D., Owen Smith, IESA, University of North Georgia 
 # Since:   November 29, 2019 
 # Grant:   Sponsored by the Georgia Forestry Commission through the Georgia 
