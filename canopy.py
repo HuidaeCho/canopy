@@ -325,7 +325,9 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
             metersPerUnit = arcpy.Describe(
                 phyregs_layer).spatialReference.metersPerUnit
             point_density *= metersPerUnit**2
+            print(point_density)
             area = row[2]
+            print(area)
             point_count = (int(point_density) / int(area)) * int(area)
             print(point_count)
             if point_count < min_points:
