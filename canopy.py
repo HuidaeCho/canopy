@@ -297,7 +297,7 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
 
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
             where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
-    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID', 'AREA']) \
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) \
             as cur:
         for row in cur:
             name = row[0]
@@ -330,6 +330,10 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
                 canopy_raster = arcpy.sa.Raster(snap_raster)
                 raster_array = arcpy.RasterToNumPyArray(canopy_raster)
                 rows, cols = raster_array.shape
+                point_array = arcpy.da.FeatureClassToNumPyArray(shp_path, 'ObjectID')
+                rows1, cols1 = point_array.shape
+
+                arcpy
 
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
