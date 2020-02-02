@@ -295,9 +295,21 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
     arcpy.env.addOutputsToMap = False
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
 
+    if len(arcpy.ListFields(phyregs_layer, 'AREA')) > 0:
+        arcpy.DeleteField_management(phyregs_layer, 'AREA')
+        arcpy.AddField_management(phyregs_layer, 'AREA', 'DOUBLE')
+        arcpy.management.CalculateGeometryAttributes(
+            phyregs_layer, "AREA AREA", '', '',
+            spatref_wkid)
+    if not len(arcpy.ListFields(phyregs_layer, 'AREA')) > 0:
+        arcpy.AddField_management(phyregs_layer, 'AREA', 'DOUBLE')
+        arcpy.management.CalculateGeometryAttributes(
+            phyregs_layer, "AREA AREA", '', '',
+            spatref_wkid)
+
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
             where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
-    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) \
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID', 'AREA']) \
             as cur:
         for row in cur:
             name = row[0]
@@ -313,8 +325,8 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
             metersPerUnit = arcpy.Describe(
                 phyregs_layer).spatialReference.metersPerUnit
             point_density *= metersPerUnit**2
-            area = arcpy.CalulateGeometryAttributes(phyregs_layer, ['AREA'])
-            point_count = point_density * area
+            area = row[2]
+            point_count = (int(point_density) / int(area)) * int(area)
             print(point_count)
             if point_count < min_points:
                 del point_count
@@ -329,11 +341,14 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
                 arcpy.AddField_management(shp_path, field, 'SHORT')
                 canopy_raster = arcpy.sa.Raster(snap_raster)
                 raster_array = arcpy.RasterToNumPyArray(canopy_raster)
+                print(raster_array)
                 rows, cols = raster_array.shape
-                point_array = arcpy.da.FeatureClassToNumPyArray(shp_path, 'ObjectID')
+                point_array = arcpy.da.FeatureClassToNumPyArray(shp_path,
+                                                                ['FID'])
+                print(point_array)
                 rows1, cols1 = point_array.shape
 
-                arcpy
+
 
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
