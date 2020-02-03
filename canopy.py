@@ -10,7 +10,7 @@
 
 import arcpy
 import os
-import numpy
+import numpy as np
 import canopy_config
 
 def assign_phyregs_to_naipqq():
@@ -275,7 +275,8 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
+def generate_ground_truthing_points(phyreg_ids, analysis_years,
+                                    point_density=0.5,
                                     max_points=999, min_points=0):
     '''
     This function generates randomized points for ground truthing.
@@ -295,21 +296,45 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
     arcpy.env.addOutputsToMap = False
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
 
-    if len(arcpy.ListFields(phyregs_layer, 'AREA')) > 0:
-        arcpy.DeleteField_management(phyregs_layer, 'AREA')
-        arcpy.AddField_management(phyregs_layer, 'AREA', 'DOUBLE')
+    if not len(arcpy.ListFields(phyregs_layer, 'AREA_SQKM')) > 0:
+        arcpy.AddField_management(phyregs_layer, 'AREA_SQKM', 'DOUBLE')
         arcpy.management.CalculateGeometryAttributes(
-            phyregs_layer, "AREA AREA", '', '',
+            phyregs_layer, [['AREA_SQKM', 'AREA']], '', 'SQUARE_KILOMETERS',
             spatref_wkid)
-    if not len(arcpy.ListFields(phyregs_layer, 'AREA')) > 0:
-        arcpy.AddField_management(phyregs_layer, 'AREA', 'DOUBLE')
-        arcpy.management.CalculateGeometryAttributes(
-            phyregs_layer, "AREA AREA", '', '',
-            spatref_wkid)
+
+    def get_array_indices(xy, ext, res):
+        '''
+        Get array indices using x, y, extent, and resolution
+        xy:  (x, y) indices
+        ext: raster extent
+        res: (width, height) raster resolution
+        '''
+        x = xy[0]
+        y = xy[1]
+        w = res[0]
+        h = res[1]
+        row = int((ext.YMax - y - h / 2) / h)
+        col = int((x - w / 2 - ext.XMin) / w)
+        return row, col
+
+    def get_raster_coordinates(rc, ext, res):
+        '''
+        Get raster coordinates using row, column, extent, and resolution
+        rc:  (row, column) indices
+        ext: raster extent
+        res: (width, height) raster resolution
+        '''
+        row = rc[0]
+        col = rc[1]
+        w = res[0]
+        h = res[1]
+        return x, y
+
 
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
             where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
-    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID', 'AREA']) \
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID',
+                                               'AREA_SQKM']) \
             as cur:
         for row in cur:
             name = row[0]
@@ -328,7 +353,7 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
             print(point_density)
             area = row[2]
             print(area)
-            point_count = (int(point_density) / int(area)) * int(area)
+            point_count = float(point_density * area)
             print(point_count)
             if point_count < min_points:
                 del point_count
@@ -340,15 +365,17 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years, point_density,
                     phyregs_layer, '', point_count)
             for analysis_year in analysis_years:
                 field = 'GT_%s' % analysis_year
-                arcpy.AddField_management(shp_path, field, 'SHORT')
-                canopy_raster = arcpy.sa.Raster(snap_raster)
-                raster_array = arcpy.RasterToNumPyArray(canopy_raster)
-                print(raster_array)
-                rows, cols = raster_array.shape
-                point_array = arcpy.da.FeatureClassToNumPyArray(shp_path,
-                                                                ['FID'])
-                print(point_array)
-                rows1, cols1 = point_array.shape
+                if not len(arcpy.ListFields(shp_path, field)) > 0:
+                    arcpy.AddField_management(shp_path, field, 'SHORT')
+                ras = arcpy.sa.Raster(snap_raster)
+                ras_a = arcpy.RasterToNumPyArray(ras)
+                y = (ras.extent.YMax-ras.extent.YMin)/ras.meanCellHeight
+                x = (ras.extent.XMax-ras.extent.XMin)/ras.meanCellWidth
+
+                rc = get_array_indices([x, y], ras.extent, ras_a.shape)
+                cor = get_raster_coordinates(rc, ras.extent, ras_a.shape)
+                print(cor)
+
 
 
 
