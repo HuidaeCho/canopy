@@ -375,25 +375,21 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
                 rc = get_array_indices([x, y], ras.extent, ras_a.shape)
                 cor = get_raster_coordinates(rc, ras.extent, ras_a.shape)
                 print(cor)
-                with arcpy.da.SearchCursor(shp_path, ['FID']) as cur2:
+                with arcpy.da.SearchCursor(shp_path, ['SHAPE@XY']) as cur2:
                     for row in cur2:
                         ras = arcpy.sa.Raster(snap_raster)
-                        ras_a = arcpy.RasterToNumPyArray(ras)
-                        y = (ras.extent.YMax-ras.extent.YMin)/ras.meanCellHeight
-                        x = (ras.extent.XMax-ras.extent.XMin)/ras.meanCellWidth
-
-                        rc = get_array_indices([x, y], ras.extent, ras_a.shape)
-                        cor = get_raster_coordinates(rc, ras.extent, ras_a.shape) 
+                        ras_a = arcpy.RasterToNumPyArray(ras) 
                         
                         pnt = row[0]
-                        pnt_x = pnt.X
-                        pnt_y = pnt.Y
-                        xy = [(pnt_x,pnt_y)]
-                        if xy = cor:
-                            i = ras_a[rc[0]][rc[1]]
-                            cur2.insertRow[i]
+                        pnt_x = pnt[0]
+                        pnt_y = pnt[1]
+                        xy = [pnt_x,pnt_y]
 
+                        rc = get_array_indices(xy, ras.extent, ras_a.shape)
 
+                        ras_a[rc[0]][rc[1]]
+
+                        # TODO: complete loop for getting raster values 
 
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
