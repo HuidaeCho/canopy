@@ -277,7 +277,7 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
 
 def generate_ground_truthing_points(phyreg_ids, analysis_years,
                                     point_density=0.5,
-                                    max_points=999, min_points=0):
+                                    max_points=400, min_points=0):
     '''
     This function generates randomized points for ground truthing.
 
@@ -375,6 +375,16 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
                 rc = get_array_indices([x, y], ras.extent, ras_a.shape)
                 cor = get_raster_coordinates(rc, ras.extent, ras_a.shape)
                 print(cor)
+                with arcpy.da.SearchCursor(shp_path, ['FID']) as cur2:
+                    for row in cur2:
+                        pnt = row[0]
+                        pnt_x = pnt.X
+                        pnt_y = pnt.Y
+                        xy = [pnt_x,pnt_y]
+                        
+
+
+
 
 
 
