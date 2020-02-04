@@ -383,23 +383,15 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
                         x = (ras.extent.XMax-ras.extent.XMin)/ras.meanCellWidth
 
                         rc = get_array_indices([x, y], ras.extent, ras_a.shape)
-                        cor = get_raster_coordinates(rc, ras.extent, ras_a.shape)    
-
+                        cor = get_raster_coordinates(rc, ras.extent, ras_a.shape) 
+                        
                         pnt = row[0]
                         pnt_x = pnt.X
                         pnt_y = pnt.Y
                         xy = [(pnt_x,pnt_y)]
                         if xy = cor:
-
-                            
-
-
-
-                            cur2.insertRow[]
-
-
-
-
+                            i = ras_a[rc[0]][rc[1]]
+                            cur2.insertRow[i]
 
 
 
