@@ -377,11 +377,25 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
                 print(cor)
                 with arcpy.da.SearchCursor(shp_path, ['FID']) as cur2:
                     for row in cur2:
+                        ras = arcpy.sa.Raster(snap_raster)
+                        ras_a = arcpy.RasterToNumPyArray(ras)
+                        y = (ras.extent.YMax-ras.extent.YMin)/ras.meanCellHeight
+                        x = (ras.extent.XMax-ras.extent.XMin)/ras.meanCellWidth
+
+                        rc = get_array_indices([x, y], ras.extent, ras_a.shape)
+                        cor = get_raster_coordinates(rc, ras.extent, ras_a.shape)    
+
                         pnt = row[0]
                         pnt_x = pnt.X
                         pnt_y = pnt.Y
-                        xy = [pnt_x,pnt_y]
-                        
+                        xy = [(pnt_x,pnt_y)]
+                        if xy = cor:
+
+                            
+
+
+
+                            cur2.insertRow[]
 
 
 
