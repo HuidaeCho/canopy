@@ -315,10 +315,10 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
         ext: raster extent
         res: (width, height) raster resolution
         '''
-        x = xy[0]
-        y = xy[1]
-        w = res[0]
-        h = res[1]
+        x = xy[1]
+        y = xy[0]
+        w = res[1]
+        h = res[0]
         row = int((ext.YMax - y - h / 2) / h)
         col = int((x - w / 2 - ext.XMin) / w)
         return row, col
@@ -369,13 +369,13 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
                     pnt_x = row2[1]
                     pnt_y = row2[2]
                     xy = (pnt_x, pnt_y)
-
+                    print(xy)
                     rc = get_array_indices(xy, ras.extent, ras_a.shape)
                     print(rc)
 
                     print(ras_a[rc[0]][rc[1]])
 
-                    # TODO: complete loop for getting raster values
+
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
                 # Values to Points creates a new point shapefile, so we will
