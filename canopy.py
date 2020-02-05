@@ -58,6 +58,8 @@ def assign_phyregs_to_naipqq():
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
     print('Completed')
 
+
+# noinspection PyUnresolvedReferences
 def reproject_input_tiles(phyreg_ids):
     '''
     This function reprojects and snaps the NAIP tiles that intersect selected
@@ -275,6 +277,8 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
+
+# noinspection PyUnresolvedReferences
 def generate_ground_truthing_points(phyreg_ids, analysis_years,
                                     point_density=0.5,
                                     max_points=400, min_points=0):
@@ -290,11 +294,13 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
     project_path = canopy_config.project_path
     analysis_path_format = canopy_config.analysis_path_format
     snap_raster = canopy_config.snaprast_path
-
-    outdir_path = '%s/Results' % project_path
+    gt_output_folder = canopy_config.ground_truth
 
     arcpy.env.addOutputsToMap = False
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
+
+    if not os.path.join(gt_output_folder):
+        os.mkdir(gt_output_folder)
 
     if not len(arcpy.ListFields(phyregs_layer, 'AREA_SQKM')) > 0:
         arcpy.AddField_management(phyregs_layer, 'AREA_SQKM', 'DOUBLE')
@@ -317,20 +323,6 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
         col = int((x - w / 2 - ext.XMin) / w)
         return row, col
 
-    def get_raster_coordinates(rc, ext, res):
-        '''
-        Get raster coordinates using row, column, extent, and resolution
-        rc:  (row, column) indices
-        ext: raster extent
-        res: (width, height) raster resolution
-        '''
-        row = rc[0]
-        col = rc[1]
-        w = res[0]
-        h = res[1]
-        return x, y
-
-
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
             where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
     with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID',
@@ -341,10 +333,10 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
             print(name)
             name = name.replace(' ', '_')
             phyreg_id = row[1]
-            if not os.path.exists(outdir_path):
-                os.mkdir(outdir_path)
+            if not os.path.exists(gt_output_folder):
+                os.mkdir(gt_output_folder)
             shp_filename = 'gtpoints_%s.shp' % name
-            shp_path = '%s/%s' % (outdir_path, shp_filename)
+            shp_path = '%s/%s' % (gt_output_folder, shp_filename)
             arcpy.SelectLayerByAttribute_management(phyregs_layer,
                     where_clause='PHYSIO_ID=%d' % phyreg_id)
             metersPerUnit = arcpy.Describe(
@@ -361,36 +353,30 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
             if point_count > max_points:
                 del point_count
                 point_count = max_points
-            arcpy.CreateRandomPoints_management(outdir_path, shp_filename,
+            arcpy.CreateRandomPoints_management(gt_output_folder, shp_filename,
                     phyregs_layer, '', point_count)
             for analysis_year in analysis_years:
                 field = 'GT_%s' % analysis_year
                 if not len(arcpy.ListFields(shp_path, field)) > 0:
                     arcpy.AddField_management(shp_path, field, 'SHORT')
-                ras = arcpy.sa.Raster(snap_raster)
-                ras_a = arcpy.RasterToNumPyArray(ras)
-                y = (ras.extent.YMax-ras.extent.YMin)/ras.meanCellHeight
-                x = (ras.extent.XMax-ras.extent.XMin)/ras.meanCellWidth
+            with arcpy.da.SearchCursor(shp_path, ['FID', 'SHAPE@X',
+                                                  'SHAPE@Y']) as cur2:
+                for row2 in cur2:
+                    ras = arcpy.sa.Raster(snap_raster)
+                    ras_a = arcpy.RasterToNumPyArray(ras)
+                    ras_2d = ras_a.transpose(1, 0, 2).reshape((ras_a.shape[1]),
+                                           ras_a.shape[2], -1)
 
-                rc = get_array_indices([x, y], ras.extent, ras_a.shape)
-                cor = get_raster_coordinates(rc, ras.extent, ras_a.shape)
-                print(cor)
-                with arcpy.da.SearchCursor(shp_path, ['SHAPE@XY']) as cur2:
-                    for row in cur2:
-                        ras = arcpy.sa.Raster(snap_raster)
-                        ras_a = arcpy.RasterToNumPyArray(ras) 
-                        
-                        pnt = row[0]
-                        pnt_x = pnt[0]
-                        pnt_y = pnt[1]
-                        xy = [pnt_x,pnt_y]
+                    pnt_x = row2[1]
+                    pnt_y = row2[2]
+                    xy = (pnt_x, pnt_y)
+                    
+                    rc = get_array_indices(xy, ras.extent, ras_a.shape)
+                    print(rc)
 
-                        rc = get_array_indices(xy, ras.extent, ras_a.shape)
+                    print(ras_2d[rc[0]][rc[1]])
 
-                        ras_a[rc[0]][rc[1]]
-
-                        # TODO: complete loop for getting raster values 
-
+                    # TODO: complete loop for getting raster values
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
                 # Values to Points creates a new point shapefile, so we will
