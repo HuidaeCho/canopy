@@ -293,7 +293,7 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
     spatref_wkid = canopy_config.spatref_wkid
     project_path = canopy_config.project_path
     analysis_path_format = canopy_config.analysis_path_format
-    snap_raster = canopy_config.snaprast_path
+    test_rast = canopy_config.test_path_rast
     gt_output_folder = canopy_config.ground_truth
 
     arcpy.env.addOutputsToMap = False
@@ -362,19 +362,18 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
             with arcpy.da.SearchCursor(shp_path, ['FID', 'SHAPE@X',
                                                   'SHAPE@Y']) as cur2:
                 for row2 in cur2:
-                    ras = arcpy.sa.Raster(snap_raster)
+                    ras = arcpy.sa.Raster(test_rast)
                     ras_a = arcpy.RasterToNumPyArray(ras)
-                    ras_2d = ras_a.transpose(1, 0, 2).reshape((ras_a.shape[1]),
-                                           ras_a.shape[2], -1)
 
+                    print(ras_a.shape)
                     pnt_x = row2[1]
                     pnt_y = row2[2]
                     xy = (pnt_x, pnt_y)
-                    
+
                     rc = get_array_indices(xy, ras.extent, ras_a.shape)
                     print(rc)
 
-                    print(ras_2d[rc[0]][rc[1]])
+                    print(ras_a[rc[0]][rc[1]])
 
                     # TODO: complete loop for getting raster values
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
