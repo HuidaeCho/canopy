@@ -58,8 +58,6 @@ def assign_phyregs_to_naipqq():
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
     print('Completed')
 
-
-# noinspection PyUnresolvedReferences
 def reproject_input_tiles(phyreg_ids):
     '''
     This function reprojects and snaps the NAIP tiles that intersect selected
@@ -277,8 +275,6 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-
-# noinspection PyUnresolvedReferences
 def generate_ground_truthing_points(phyreg_ids, analysis_years,
                                     point_density=0.5,
                                     max_points=400, min_points=0):
