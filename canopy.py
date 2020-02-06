@@ -275,7 +275,7 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def generate_ground_truthing_points(phyreg_ids, analysis_years,
+def generate_ground_truthing_points(phyreg_ids,
                                     point_density=0.5,
                                     max_points=400, min_points=0):
     '''
@@ -291,9 +291,12 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
     analysis_path_format = canopy_config.analysis_path_format
     test_rast = canopy_config.test_path_rast
     gt_output_folder = canopy_config.ground_truth
+    analysis_year = canopy_config.analysis_year
+    results_path = canopy_config.results_path
 
     arcpy.env.addOutputsToMap = False
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
+    
 
     if not os.path.join(gt_output_folder):
         os.mkdir(gt_output_folder)
@@ -351,29 +354,37 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
                 point_count = max_points
             arcpy.CreateRandomPoints_management(gt_output_folder, shp_filename,
                     phyregs_layer, '', point_count)
+            analysis_years = str(analysis_year)
             for analysis_year in analysis_years:
                 field = 'GT_%s' % analysis_year
                 if not len(arcpy.ListFields(shp_path, field)) > 0:
                     arcpy.AddField_management(shp_path, field, 'SHORT')
-            with arcpy.da.SearchCursor(shp_path, ['FID', 'SHAPE@X',
-                                                  'SHAPE@Y']) as cur2:
-                for row2 in cur2:
-                    ras = arcpy.sa.Raster(test_rast)
-                    ras_a = arcpy.RasterToNumPyArray(ras)
-
-                    print(ras_a.shape)
-                    pnt_x = row2[1]
-                    pnt_y = row2[2]
-                    xy = (pnt_x, pnt_y)
-                    print(xy)
-                    rc = get_array_indices(xy, ras.extent, ras_a.shape)
-                    print(rc)
-
-                    with arcpy.da.UpdateCursor(shp_path, [field]) as cur:
-						for row in cur:
-							row[0] = ras_a[rc[0]][rc[1]]
-							cur.updateRow(row)
-
+            region_out = '%s/Outputs' % name
+            path = os.path.join(results_path, region_out)        
+            for dir, sub, files in os.walk(path):
+                for f in files:
+                    canopy_year = 'canopy_' + analysis_years + '_'
+                    in_file = canopy_year + name + '.tif'
+                    if f == in_file:
+                        raster = os.path.join(path, f)
+                        ras = arcpy.sa.Raster(raster)
+                        ras_a = arcpy.RasterToNumPyArray(ras)
+                        with arcpy.da.SearchCursor(shp_path, ['FID', 'SHAPE@X',
+                                                            'SHAPE@Y', field]) as cur2:
+                            for row2 in cur2:
+                                print(ras_a.shape)
+                                pnt_x = row2[1]
+                                pnt_y = row2[2]
+                                xy = (pnt_x, pnt_y)
+                                print(xy)
+                                rc = get_array_indices(xy, ras.extent, ras_a.shape)
+                                print(rc)
+            
+                                with arcpy.da.UpdateCursor(shp_path, [field]) as cur:
+                                    for row in cur:
+                                        row[0] = ras_a[rc[0]][rc[1]]
+                                        cur.updateRow(row)
+        
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
                 # Values to Points creates a new point shapefile, so we will
