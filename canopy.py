@@ -373,8 +373,10 @@ def generate_ground_truthing_points(phyreg_ids, analysis_years,
                     rc = get_array_indices(xy, ras.extent, ras_a.shape)
                     print(rc)
 
-                    print(ras_a[rc[0]][rc[1]])
-
+                    with arcpy.da.UpdateCursor(shp_path, [field]) as cur:
+						for row in cur:
+							row[0] = ras_a[rc[0]][rc[1]]
+							cur.updateRow(row)
 
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
