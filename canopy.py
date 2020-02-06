@@ -314,12 +314,12 @@ def generate_ground_truthing_points(phyreg_ids,
         ext: raster extent
         res: (width, height) raster resolution
         '''
-        x = xy[1]
-        y = xy[0]
-        w = res[1]
-        h = res[0]
-        row = int((ext.YMax - y - h / 2) / h)
-        col = int((x - w / 2 - ext.XMin) / w)
+        x = xy[0]
+        y = xy[1]
+        w = res[0]
+        h = res[1]
+        row = int((ext.YMax - y) / h)
+        col = int((x - ext.XMin) / w)
         return row, col
 
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
@@ -368,6 +368,7 @@ def generate_ground_truthing_points(phyreg_ids,
                     if f == in_file:
                         raster = os.path.join(path, f)
                         ras = arcpy.sa.Raster(raster)
+                        res = (ras.meanCellWidth, ras.meanCellHeight)
                         ras_a = arcpy.RasterToNumPyArray(ras)
                         with arcpy.da.SearchCursor(shp_path, ['FID', 'SHAPE@X',
                                                             'SHAPE@Y', field]) as cur2:
@@ -376,11 +377,11 @@ def generate_ground_truthing_points(phyreg_ids,
                                 pnt_x = row2[1]
                                 pnt_y = row2[2]
                                 xy = (pnt_x, pnt_y)
-                                print(xy)
-                                rc = get_array_indices(xy, ras.extent, ras_a.shape)
+                                print(xy, ras.extent, ras_a.shape)
+                                rc = get_array_indices(xy, ras.extent, res)
                                 print(rc)
             
-                                with arcpy.da.UpdateCursor(shp_path, [field]) as cur:
+                                with arcpy.da.UpdateCursor(shp_path, [field], 'FID = %d' % row2[0]) as cur:
                                     for row in cur:
                                         row[0] = ras_a[rc[0]][rc[1]]
                                         cur.updateRow(row)
