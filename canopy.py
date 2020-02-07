@@ -14,12 +14,12 @@ import numpy as np
 import canopy_config
 
 def assign_phyregs_to_naipqq():
-    '''
+    """
     This function adds the phyregs field to the NAIP QQ shapefile and populates
     it with physiographic region IDs that intersect each NAIP tile. This
     function needs to be run only once, but running it multiple times would not
     hurt either other than wasting computational resources.
-    '''
+    """
     phyregs_layer = canopy_config.phyregs_layer
     naipqq_layer = canopy_config.naipqq_layer
     naipqq_phyregs_field = canopy_config.naipqq_phyregs_field
@@ -275,6 +275,8 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
+
+# noinspection PyAssignmentToLoopOrWithParameter
 def generate_ground_truthing_points(phyreg_ids,
                                     point_density=0.5,
                                     max_points=400, min_points=0):
@@ -296,7 +298,6 @@ def generate_ground_truthing_points(phyreg_ids,
 
     arcpy.env.addOutputsToMap = False
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
-    
 
     if not os.path.join(gt_output_folder):
         os.mkdir(gt_output_folder)
@@ -360,7 +361,7 @@ def generate_ground_truthing_points(phyreg_ids,
                 if not len(arcpy.ListFields(shp_path, field)) > 0:
                     arcpy.AddField_management(shp_path, field, 'SHORT')
             region_out = '%s/Outputs' % name
-            path = os.path.join(results_path, region_out)        
+            path = os.path.join(results_path, region_out)
             for dir, sub, files in os.walk(path):
                 for f in files:
                     canopy_year = 'canopy_' + analysis_years + '_'
@@ -370,8 +371,9 @@ def generate_ground_truthing_points(phyreg_ids,
                         ras = arcpy.sa.Raster(raster)
                         res = (ras.meanCellWidth, ras.meanCellHeight)
                         ras_a = arcpy.RasterToNumPyArray(ras)
-                        with arcpy.da.SearchCursor(shp_path, ['FID', 'SHAPE@X',
-                                                            'SHAPE@Y', field]) as cur2:
+                        with arcpy.da.SearchCursor(shp_path,
+                                                   ['FID', 'SHAPE@X', 'SHAPE@Y',
+                                                    field]) as cur2:
                             for row2 in cur2:
                                 print(ras_a.shape)
                                 pnt_x = row2[1]
@@ -380,12 +382,14 @@ def generate_ground_truthing_points(phyreg_ids,
                                 print(xy, ras.extent, ras_a.shape)
                                 rc = get_array_indices(xy, ras.extent, res)
                                 print(rc)
-            
-                                with arcpy.da.UpdateCursor(shp_path, [field], 'FID = %d' % row2[0]) as cur:
+
+                                with arcpy.da.UpdateCursor(
+                                        shp_path, [field], 'FID = %d' % row2[0]
+                                ) as cur:
                                     for row in cur:
                                         row[0] = ras_a[rc[0]][rc[1]]
                                         cur.updateRow(row)
-        
+
                 # TODO: Read cell values from canopy_YEAR_PHYREG.tif
                 # Get Cell Value reads raster at one point only. Extract
                 # Values to Points creates a new point shapefile, so we will
@@ -400,3 +404,4 @@ def generate_ground_truthing_points(phyreg_ids,
             arcpy.DeleteField_management(shp_path, 'CID')
 
     print('Completed')
+    
