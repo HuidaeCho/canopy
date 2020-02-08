@@ -110,6 +110,10 @@ snaprast_path = '%s/Data/rm_3408504_nw_16_1_20090824.tif' % analysis_path
 # This folder will contain all result files.
 results_path = '%s/Results' % analysis_path
 
+
+# Folder for generated ground truthing points to be saved in.
+ground_truth = '%s/ground_truth' % analysis_path
+
 # This list contains all physiographic region IDs, but it is not used at all.
 # reproject_input_tiles(), convert_afe_to_final_tiles(), clip_final_tiles(),
 # and mosaic_clipped_final_tiles() take a list of physiographic region IDs (a
