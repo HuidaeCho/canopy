@@ -1,25 +1,24 @@
 ################################################################################
-# Name:    canopy.py 
-# Purpose: This module provides utility functions for preprocessing NAIP tiles 
-#          and postprocessing trained canopy tiles. 
-# Authors: Huidae Cho, Ph.D., Owen Smith, IESA, University of North Georgia 
-# Since:   November 29, 2019 
-# Grant:   Sponsored by the Georgia Forestry Commission through the Georgia 
+# Name:    canopy.py
+# Purpose: This module provides utility functions for preprocessing NAIP tiles
+#          and postprocessing trained canopy tiles.
+# Authors: Huidae Cho, Ph.D., Owen Smith, IESA, University of North Georgia
+# Since:   November 29, 2019
+# Grant:   Sponsored by the Georgia Forestry Commission through the Georgia
 #          Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project
 ################################################################################
 
 import arcpy
 import os
-import numpy as np
 import canopy_config
 
 def assign_phyregs_to_naipqq():
-    """
+    '''
     This function adds the phyregs field to the NAIP QQ shapefile and populates
     it with physiographic region IDs that intersect each NAIP tile. This
     function needs to be run only once, but running it multiple times would not
     hurt either other than wasting computational resources.
-    """
+    '''
     phyregs_layer = canopy_config.phyregs_layer
     naipqq_layer = canopy_config.naipqq_layer
     naipqq_phyregs_field = canopy_config.naipqq_phyregs_field
@@ -275,23 +274,21 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-
-# noinspection PyAssignmentToLoopOrWithParameter
 def generate_ground_truthing_points(phyreg_ids,
-                                    point_density=0.5,
+                                    point_density=0.25,
                                     max_points=400, min_points=0):
     '''
     This function generates randomized points for ground truthing.
+    Can only take one phyreg_id at a time currently.
 
     phyreg_ids:     list of physiographic region IDs to process
-    analysis_years: list of field names to store point canopy data
-    point_count:    number of random points
+    point_density:  number of points per square kilometer
+    max_points:     maximum number of points allowed
+    min_points:     minimum number of points allowed
     '''
     phyregs_layer = canopy_config.phyregs_layer
+    naipqq_layer = canopy_config.naipqq_layer
     spatref_wkid = canopy_config.spatref_wkid
-    project_path = canopy_config.project_path
-    analysis_path_format = canopy_config.analysis_path_format
-    test_rast = canopy_config.test_path_rast
     gt_output_folder = canopy_config.ground_truth
     analysis_year = canopy_config.analysis_year
     results_path = canopy_config.results_path
@@ -342,11 +339,9 @@ def generate_ground_truthing_points(phyreg_ids,
             metersPerUnit = arcpy.Describe(
                 phyregs_layer).spatialReference.metersPerUnit
             point_density *= metersPerUnit**2
-            print(point_density)
             area = row[2]
-            print(area)
             point_count = float(point_density * area)
-            print(point_count)
+            print('Point Count: ', str(point_count))
             if point_count < min_points:
                 del point_count
                 point_count = min_points
@@ -355,53 +350,60 @@ def generate_ground_truthing_points(phyreg_ids,
                 point_count = max_points
             arcpy.CreateRandomPoints_management(gt_output_folder, shp_filename,
                     phyregs_layer, '', point_count)
-            analysis_years = str(analysis_year)
-            for analysis_year in analysis_years:
-                field = 'GT_%s' % analysis_year
-                if not len(arcpy.ListFields(shp_path, field)) > 0:
-                    arcpy.AddField_management(shp_path, field, 'SHORT')
+            field = 'GT_%s' % str(analysis_year)
+            if not len(arcpy.ListFields(shp_path, field)) > 0:
+                arcpy.AddField_management(shp_path, field, 'SHORT')
             region_out = '%s/Outputs' % name
             path = os.path.join(results_path, region_out)
-            for dir, sub, files in os.walk(path):
-                for f in files:
-                    canopy_year = 'canopy_' + analysis_years + '_'
-                    in_file = canopy_year + name + '.tif'
-                    if f == in_file:
-                        raster = os.path.join(path, f)
-                        ras = arcpy.sa.Raster(raster)
-                        res = (ras.meanCellWidth, ras.meanCellHeight)
-                        ras_a = arcpy.RasterToNumPyArray(ras)
-                        with arcpy.da.SearchCursor(shp_path,
-                                                   ['FID', 'SHAPE@X', 'SHAPE@Y',
-                                                    field]) as cur2:
-                            for row2 in cur2:
-                                print(ras_a.shape)
-                                pnt_x = row2[1]
-                                pnt_y = row2[2]
-                                xy = (pnt_x, pnt_y)
-                                print(xy, ras.extent, ras_a.shape)
-                                rc = get_array_indices(xy, ras.extent, res)
-                                print(rc)
+            input_naip = '%s/%s/Outputs' % (results_path, name)
+            # New spatially joined feature to
+            out_path = '%s/s%s' % (gt_output_folder, shp_filename)
 
-                                with arcpy.da.UpdateCursor(
-                                        shp_path, [field], 'FID = %d' % row2[0]
-                                ) as cur:
-                                    for row in cur:
-                                        row[0] = ras_a[rc[0]][rc[1]]
-                                        cur.updateRow(row)
+            # Spatial join naip qq layer with random points allows for
+            # bypassing the nested loops required to get necessary
+            # attributes. Original random points layer are deleted after
+            # process runs, and all fields except 'FID', 'Shape',
+            # and 'GT_Year' are deleted.
+            arcpy.analysis.SpatialJoin(shp_path,
+                                       naipqq_layer,
+                                       out_path,
+                                       "JOIN_ONE_TO_ONE", "KEEP_ALL")
 
-                # TODO: Read cell values from canopy_YEAR_PHYREG.tif
-                # Get Cell Value reads raster at one point only. Extract
-                # Values to Points creates a new point shapefile, so we will
-                # have to run this tool multiple times for all analysis years
-                # and merge output shapefiles into one. This process may not be
-                # efficient. It would be better to manually read cell values
-                # from a numpy array.
+    # Get required fields from spatially joined point layer
+    with arcpy.da.SearchCursor(out_path,
+                               ['FID', 'SHAPE@X', 'SHAPE@Y',
+                                'GT_2009', 'FileName']) as cur3:
+        for row3 in cur3:
+            # Read filenames as raster
+            filename = row3[4][:-13]
+            cfrtiffile_path = '%s/cfr%s.tif' % (input_naip, filename)
+            raster = cfrtiffile_path
+            ras = arcpy.sa.Raster(raster)
+            res = (ras.meanCellWidth, ras.meanCellHeight)
+            # Convert raster to NumPy array to read values
+            ras_a = arcpy.RasterToNumPyArray(ras)
+            # Get xy values of point
+            pnt_x = row3[1]
+            pnt_y = row3[2]
+            xy = (pnt_x, pnt_y)
+            # Perform get_array_indices to get rows and cols of the point in
+            # its corresponding array
+            rc = get_array_indices(xy, ras.extent, res)
+            with arcpy.da.UpdateCursor(out_path, ['GT_2009'],
+                                       'FID = %d' % row3[0]) as cur:
+                for row in cur:
+                    print(ras_a[rc[0]][rc[1]])
+                    row[0] = ras_a[rc[0]][rc[1]]
+                    cur.updateRow(row)
 
-            # Shapefiles require at least one field other than the ObjectID and
-            # Shape fields, so we can only delete this extra unused field after
-            # adding our fields first.
-            arcpy.DeleteField_management(shp_path, 'CID')
-
+    # Delete all fields except only those required
+    list_fields = arcpy.ListFields(out_path)
+    fields = ['FID', 'Shape', field]
+    delete_fields = [x.name for x in list_fields if x.name not in fields]
+    arcpy.DeleteField_management(out_path, delete_fields)
+    # Delete original point shapefile
+    arcpy.Delete_management(shp_path)
     print('Completed')
-    
+
+
+
