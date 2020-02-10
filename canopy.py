@@ -435,7 +435,7 @@ def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
                     # the point
                     rc = calculate_row_column(xy, ras.extent, res)
                     # update the point
-                    row2[1] = ras_a[rc[0]][rc[1]]
+                    row2[1] = ras_a[rc]
                     cur2.updateRow(row2)
 
             # delete all fields except only those required
