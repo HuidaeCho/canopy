@@ -339,8 +339,8 @@ def calculate_row_column(xy, rast_ext, rast_res):
 def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
         min_points=200):
     '''
-    This function generates randomized points for ground truthing.
-    Can only take one phyreg_id at a time currently.
+    This function generates randomized points for ground truthing. It create
+    the GT field in the output shapefile.
 
     phyreg_ids:     list of physiographic region IDs to process
     point_density:  number of points per square kilometer
