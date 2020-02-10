@@ -18,6 +18,10 @@
 #   AREA (Float)
 phyregs_layer = 'Physiographic_Districts_GA'
 
+# This output double field will be created in the phyregs layer by
+# assign_phyregs_to_naipqq().
+phyregs_area_sqkm_field = 'AREA_SQKM'
+
 # This input layer contains the polygon features for all NAIP tiles.
 # Data source: ga_naip09qq.zip
 #              David Parry, USDA, September 30, 2019 at 9:48am
@@ -27,7 +31,7 @@ naipqq_layer = 'naip_ga_2009_1m_m4b'
 
 # This output text field will be created in the naipqq layer by
 # assign_phyregs_to_naipqq().
-naipqq_phyregs_field = 'phyregs'
+naipqq_phyregs_field = 'PHYREGS'
 
 # The structure of this input folder is defined by USDA, the original source of
 # NAIP imagery. Under this folder are multiple 5-digit numeric folders that
@@ -58,9 +62,6 @@ spatref_wkid = 102039
 #   C:/.../ (project_path)
 #          Data/
 #               Physiographic_Districts_GA.shp (added as a layer)
-#          Results/
-#                  gtpoints_Winder_Slope.shp
-#                  ...
 #          2009 Analysis/ (analysis_path)
 #                        Data/
 #                             naip_ga_2009_1m_m4b.shp (added as a layer)
@@ -72,6 +73,7 @@ spatref_wkid = 102039
 #                                             Outputs/
 #                                                     intermediate output tiles
 #                                                     canopy_2009_Winder_Slope.tif
+#                                                     gtpoints_2009_Winder_Slope.tif
 #                                ...
 #          2019 Analysis/ (analysis_path)
 #                        Data/
@@ -84,6 +86,7 @@ spatref_wkid = 102039
 #                                             Outputs/
 #                                                     intermediate output tiles
 #                                                     canopy_2019_Winder_Slope.tif
+#                                                     gtpoints_2019_Winder_Slope.tif
 #                                ...
 #          ...
 
@@ -109,10 +112,6 @@ snaprast_path = '%s/Data/rm_3408504_nw_16_1_20090824.tif' % analysis_path
 
 # This folder will contain all result files.
 results_path = '%s/Results' % analysis_path
-
-
-# Folder for generated ground truthing points to be saved in.
-ground_truth = '%s/ground_truth' % analysis_path
 
 # This list contains all physiographic region IDs, but it is not used at all.
 # reproject_input_tiles(), convert_afe_to_final_tiles(), clip_final_tiles(),
