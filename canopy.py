@@ -336,6 +336,82 @@ def calculate_row_column(xy, rast_ext, rast_res):
     col = int((x - rast_ext.XMin) / w)
     return row, col
 
+def generate_randomized_ground_truthing_points(phyreg_ids, point_density,
+                                               max_points=400, min_points=200):
+    # fix a user error, if any
+    if min_points > max_points:
+        tmp = min_points
+        min_points = max_points
+        max_points = tmp
+
+    phyregs_layer = canopy_config.phyregs_layer
+    phyregs_area_sqkm_field = canopy_config.phyregs_area_sqkm_field
+
+    spatref_wkid = canopy_config.spatref_wkid
+    analysis_year = canopy_config.analysis_year
+    results_path = canopy_config.results_path
+
+    arcpy.env.overwriteOutput = True
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
+
+    # make sure to clear selection because most geoprocessing tools use
+    # selected features, if any
+    arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
+
+    # select phyregs features to process
+    arcpy.SelectLayerByAttribute_management(phyregs_layer,
+                        where_clause='PHYSIO_ID in (%s)' % ','.join(
+                                                map(str, phyreg_ids)))
+    with arcpy.da.SearchCursor(phyregs_layer,
+                               ['NAME', 'PHYSIO_ID',
+                                phyregs_area_sqkm_field]) as cur:
+        for row in cur:
+            name = row[0]
+            print(name)
+            # CreateRandomPoints cannot create a shapefile with - in its
+            # filename
+            name = name.replace(' ', '_').replace('-', '_')
+            phyreg_id = row[1]
+            area_sqkm = row[2]
+
+            # +1 to count partial points; e.g., 0.1 requires one point
+            point_count = int(point_density * area_sqkm + 1)
+            print('Raw point count: %d' % point_count)
+            if point_count < min_points:
+                point_count = min_points
+            elif point_count > max_points:
+                point_count = max_points
+            print('Final point count: %d' % point_count)
+
+            outdir_path = '%s/%s/Outputs' % (results_path, name)
+            shp_filename = 'gtpoints_%d_%s.shp' % (analysis_year, name)
+
+            tmp_shp_filename = 'tmp_%s' % shp_filename
+            tmp_shp_path = '%s/%s' % (outdir_path, tmp_shp_filename)
+
+            # create random points
+            arcpy.SelectLayerByAttribute_management(phyregs_layer,
+                    where_clause='PHYSIO_ID=%d' % phyreg_id)
+            arcpy.CreateRandomPoints_management(outdir_path, tmp_shp_filename,
+                                                phyregs_layer, '', point_count)
+
+            # create a new field to store data for ground thruthing
+            gt_field = 'GT'
+            arcpy.AddField_management(tmp_shp_path, gt_field, 'SHORT')
+
+            # delete all fields except only those required
+            shp_desc = arcpy.Describe(tmp_shp_path)
+            oid_field = shp_desc.OIDFieldName
+            shape_field = shp_desc.shapeFieldName
+
+            all_fields = arcpy.ListFields(tmp_shp_path)
+            required_fields = [oid_field, shape_field, gt_field]
+            extra_fields = [x.name for x in all_fields
+                    if x.name not in required_fields]
+            arcpy.DeleteField_management(tmp_shp_path, extra_fields)
+
+
 def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
         min_points=200):
     '''
