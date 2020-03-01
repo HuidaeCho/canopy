@@ -319,7 +319,7 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def correct_inverted_outputs(phyreg_ids):
+def correct_inverted_canopy_tiff(phyreg_ids):
     '''
     This function corrects the values of mosaikced and clipped regions that
     have been inverted with values Canopy: 0 Noncanopy: 1 and changes them to
