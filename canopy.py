@@ -320,6 +320,13 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     mosaic_clipped_final_tiles(phyreg_ids)
 
 def correct_inverted_outputs(phyreg_ids):
+    '''
+    This function corrects the values of mosaikced and clipped regions that
+    have been inverted with values Canopy: 0 Noncanopy: 1 and changes them to
+    Canopy: 1, Noncanopy: 0
+
+    phyreg_ids: list of physiographic region IDs to process
+    '''
     phyregs_layer = canopy_config.phyregs_layer
     analysis_year = canopy_config.analysis_year
     snaprast_path = canopy_config.snaprast_path
@@ -352,7 +359,9 @@ def correct_inverted_outputs(phyreg_ids):
                 # Reclassify 1 values to 0, 0 values to 1
                 reclass = arcpy.sa.Reclassify(canopytif_path, 'Value',
                                               '1 0;0 1')
-                # Copy raster is used as arcpy.save does not give bit options
+                # Copy raster is used as arcpy.save does not give bit options.
+                # Background is set to value 2 and used as the nodata value
+                # to prevent entire extent having values in output
                 arcpy.CopyRaster_management(reclass, corrected_path,
                                             pixel_type='2_BIT',
                                             background_value=2,
@@ -360,7 +369,6 @@ def correct_inverted_outputs(phyreg_ids):
 
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
     print('Completed')
-
 
 def calculate_row_column(xy, rast_ext, rast_res):
     '''
