@@ -119,3 +119,7 @@ results_path = '%s/Results' % analysis_path
 # subset of this list) to process the specified regions only. This list is
 # defined here as a reference only.
 phyreg_ids = [8,7,2,14,22,5,4,12,9,11,20,3,6,26,13,17,24,25,15,23,21,16,18,19]
+
+# This list contains physiographic region IDs whose trained model produces an
+# inverted result.
+inverted_phyreg_ids = [5, 21, 12, 4, 11, 17, 2, 26, 20, 16]

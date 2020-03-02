@@ -127,7 +127,7 @@ def reproject_input_tiles(phyreg_ids):
                         arcpy.ProjectRaster_management(infile_path,
                                 outfile_path, spatref)
 
-    # clear selection again
+    # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
 
@@ -179,7 +179,7 @@ def convert_afe_to_final_tiles(phyreg_ids):
                         arcpy.Reclassify_3d(rtiffile_path, 'Value', '1 0;2 1',
                                 frtiffile_path)
 
-    # clear selection again
+    # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
 
@@ -233,7 +233,7 @@ def clip_final_tiles(phyreg_ids):
                         arcpy.gp.ExtractByMask_sa(frtiffile_path, naipqq_layer,
                                 cfrtiffile_path)
 
-    # clear selection again
+    # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
 
@@ -301,7 +301,7 @@ def mosaic_clipped_final_tiles(phyreg_ids):
             arcpy.gp.ExtractByMask_sa(mosaictif_path, phyregs_layer,
                     canopytif_path)
 
-    # clear selection again
+    # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
 
@@ -319,13 +319,13 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def correct_inverted_canopy_tiff(phyreg_ids):
+def correct_inverted_canopy_tiff(inverted_phyreg_ids):
     '''
     This function corrects the values of mosaikced and clipped regions that
-    have been inverted with values Canopy: 0 Noncanopy: 1 and changes them to
-    Canopy: 1, Noncanopy: 0
+    have been inverted with values canopy 0 and noncanopy 1, and changes them
+    to canopy 1 and noncanopy 0.
 
-    phyreg_ids: list of physiographic region IDs to process
+    inverted_phyreg_ids: list of physiographic region IDs to process
     '''
     phyregs_layer = canopy_config.phyregs_layer
     analysis_year = canopy_config.analysis_year
@@ -336,7 +336,8 @@ def correct_inverted_canopy_tiff(phyreg_ids):
     arcpy.env.snapRaster = snaprast_path
 
     arcpy.SelectLayerByAttribute_management(phyregs_layer,
-            where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
+            where_clause='PHYSIO_ID in (%s)' % ','.join(
+                map(str, inverted_phyreg_ids)))
     with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
         for row in cur:
             name = row[0]
@@ -347,27 +348,24 @@ def correct_inverted_canopy_tiff(phyreg_ids):
             if not os.path.exists(outdir_path):
                 continue
             canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
-                analysis_year, name)
-            # Name of corrected regions just add corrected_ as prefix
+                    analysis_year, name)
+            # name of corrected regions just add corrected_ as prefix
             corrected_path = '%s/corrected_canopy_%d_%s.tif' % (
-                outdir_path,analysis_year, name)
+                outdir_path, analysis_year, name)
             if not os.path.exists(canopytif_path):
                 continue
             if os.path.exists(corrected_path):
                 continue
             if not os.path.exists(corrected_path):
-                # Reclassify 1 values to 0, 0 values to 1
-                reclass = arcpy.sa.Reclassify(canopytif_path, 'Value',
-                                              '1 0;0 1')
-                # Copy raster is used as arcpy.save does not give bit options.
-                # Background is set to value 2 and used as the nodata value
-                # to prevent entire extent having values in output
-                arcpy.CopyRaster_management(reclass, corrected_path,
-                                            pixel_type='2_BIT',
-                                            background_value=2,
-                                            nodata_value=2)
+                # switch 1 and 0
+                corrected = 1 - arcpy.Raster(canopytif_path)
+                # copy raster is used as arcpy.save does not give bit options.
+                arcpy.CopyRaster_management(corrected, corrected_path,
+                        pixel_type='2_BIT')
 
+    # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
+
     print('Completed')
 
 def calculate_row_column(xy, rast_ext, rast_res):
