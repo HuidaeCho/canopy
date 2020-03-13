@@ -502,3 +502,30 @@ def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
 
     print('Completed')
+
+def add_naip(gt_point):
+    '''
+    This function adds naip imagery where a groundtruthing point is located
+    into an arcgis project. Imagery is saved as a temporary layer. Functional
+    in both Arcmap & ArcGIS Pro.
+
+    Parameters:
+    gt_point: name of ground truhting point shapefile to add naip based off of
+    '''
+    naipqq_layer = canopy_config.naipqq_layer
+    naip_path = canopy_config.naip_path
+
+    arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
+    arcpy.SelectLayerByLocation_management(naipqq_layer, 'INTERSECT', gt_point)
+
+    with arcpy.da.SearchCursor(naipqq_layer, ['FileName']) as cur:
+                for row in sorted(cur):
+                    filename = '%s.tif' % row[0][:-13]
+                    folder = filename[2:7]
+                    infile_path = '%s/%s/%s' % (naip_path, folder, filename)
+                    tmp = 'in_memory/%s' % filename
+                    raster = arcpy.MakeRasterLayer_management(infile_path, tmp)
+
+    arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
+
+    print('Complete')
