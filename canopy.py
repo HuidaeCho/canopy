@@ -418,6 +418,49 @@ def correct_inverted_canopy_tiff(inverted_phyreg_ids):
 
     print('Completed')
 
+
+def convert_canopy_tif_to_shp(phyreg_id):
+
+    phyregs_layer = canopy_config.phyregs_layer
+    analysis_year = canopy_config.analysis_year
+    snaprast_path = canopy_config.snaprast_path
+    results_path = canopy_config.results_path
+
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.snapRaster = snaprast_path
+
+    arcpy.SelectLayerByAttribute_management(phyregs_layer,
+            where_clause='PHYSIO_ID in (%s)' % ','.join(
+                map(str, phyreg_id)))
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
+        for row in cur:
+            name = row[0]
+            print(name)
+            name = name.replace(' ', '_').replace('-', '_')
+            phyreg_id = row[1]
+            outdir_path = '%s/%s/Outputs' % (results_path, name)
+            if not os.path.exists(outdir_path):
+                continue
+            canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
+                                                      analysis_year, name)
+            # name of corrected regions just add corrected_ as prefix
+            canopyshp_path = '%s/shp_canopy_%d_%s.shp' % (
+                outdir_path, analysis_year, name)
+            if not os.path.exists(canopytif_path):
+                continue
+            if os.path.exists(canopyshp_path):
+                continue
+            if not os.path.exists(canopyshp_path):
+                # switch 1 and 0
+                arcpy.RasterToPolygon_conversion(canopytif_path, canopyshp_path,
+                                                 'NO_SIMPLIFY')
+
+    # clear selection
+    arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
+
+    print('Completed')
+
+
 def calculate_row_column(xy, rast_ext, rast_res):
     '''
     This function calculates array row and column using x, y, extent, and
@@ -580,45 +623,3 @@ def add_naip(gt_point):
 
     print('Completed')
 
-def canopy_tif_to_shp(phyreg_id):
-
-    phyregs_layer = canopy_config.phyregs_layer
-    analysis_year = canopy_config.analysis_year
-    snaprast_path = canopy_config.snaprast_path
-    results_path = canopy_config.results_path
-
-    arcpy.env.addOutputsToMap = False
-    arcpy.env.snapRaster = snaprast_path
-
-    arcpy.SelectLayerByAttribute_management(phyregs_layer,
-                                            where_clause='PHYSIO_ID in (%s)' % ','.join(
-                                                map(str, phyreg_id)))
-    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
-        for row in cur:
-            name = row[0]
-            print(name)
-            name = name.replace(' ', '_').replace('-', '_')
-            phyreg_id = row[1]
-            outdir_path = '%s/%s/Outputs' % (results_path, name)
-            if not os.path.exists(outdir_path):
-                continue
-            canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
-                                                      analysis_year, name)
-            # name of corrected regions just add corrected_ as prefix
-            canopyshp_path = '%s/shp_canopy_%d_%s.shp' % (
-                outdir_path, analysis_year, name)
-            if not os.path.exists(canopytif_path):
-                continue
-            if os.path.exists(canopyshp_path):
-                continue
-            if not os.path.exists(canopyshp_path):
-                # switch 1 and 0
-                arcpy.RasterToPolygon(canopytif_path, canopyshp_path, 'NO_SIMPLIFY')
-                # copy raster is used as arcpy.save does not give bit options.
-                # arcpy.CopyRaster_management(corrected, corrected_path,
-                #                             pixel_type='2_BIT')
-
-    # clear selection
-    arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
-
-    print('Completed')
