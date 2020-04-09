@@ -443,17 +443,22 @@ def convert_canopy_tif_to_shp(phyreg_id):
                 continue
             canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
                                                       analysis_year, name)
-            # name of corrected regions just add corrected_ as prefix
+            corrected_path = '%s/corrected_canopy_%d_%s.tif' % (
+                outdir_path, analysis_year, name)
             canopyshp_path = '%s/shp_canopy_%d_%s.shp' % (
                 outdir_path, analysis_year, name)
-            if not os.path.exists(canopytif_path):
-                continue
+
             if os.path.exists(canopyshp_path):
                 continue
             if not os.path.exists(canopyshp_path):
-                # switch 1 and 0
-                arcpy.RasterToPolygon_conversion(canopytif_path, canopyshp_path,
-                                                 'NO_SIMPLIFY')
+                if os.path.exists(corrected_path):
+                    arcpy.RasterToPolygon_conversion(corrected_path,
+                            canopyshp_path, 'NO_SIMPLIFY', 'Value')
+                    continue
+                elif os.path.exists(canopytif_path):
+                    arcpy.RasterToPolygon_conversion(canopytif_path,
+                            canopyshp_path, 'NO_SIMPLIFY', 'Value')
+                    continue
 
     # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
