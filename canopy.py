@@ -411,7 +411,8 @@ def correct_inverted_canopy_tiff(inverted_phyreg_ids):
                 corrected = 1 - arcpy.Raster(canopytif_path)
                 # copy raster is used as arcpy.save does not give bit options.
                 arcpy.CopyRaster_management(corrected, corrected_path,
-                        pixel_type='2_BIT')
+                                            nodata_value = '3',
+                                            pixel_type='2_BIT')
 
     # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
