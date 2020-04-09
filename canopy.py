@@ -133,6 +133,7 @@ def reproject_input_tiles(phyreg_ids):
 
     print('Completed')
 
+
 def convert_afe_to_final_tiles(phyreg_ids):
     '''
     This function converts AFE outputs to final TIFF files.
@@ -178,6 +179,55 @@ def convert_afe_to_final_tiles(phyreg_ids):
                     elif os.path.exists(rtiffile_path):
                         arcpy.Reclassify_3d(rtiffile_path, 'Value', '1 0;2 1',
                                 frtiffile_path)
+
+    # clear selection
+    arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
+    arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
+
+    print('Completed')
+
+def convert_2bit(phyreg_ids):
+    phyregs_layer = canopy_config.phyregs_layer
+    naipqq_layer = canopy_config.naipqq_layer
+    naipqq_phyregs_field = canopy_config.naipqq_phyregs_field
+    snaprast_path = canopy_config.snaprast_path
+    results_path = canopy_config.results_path
+
+    naipqq_oid_field = arcpy.Describe(naipqq_layer).OIDFieldName.encode()
+
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.snapRaster = snaprast_path
+
+    arcpy.SelectLayerByAttribute_management(phyregs_layer,
+            where_clause='PHYSIO_ID in (%s)' % ','.join(map(str, phyreg_ids)))
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
+        for row in cur:
+            name = row[0]
+            print(name)
+            # CreateRandomPoints cannot create a shapefile with - in its
+            # filename
+            name = name.replace(' ', '_').replace('-', '_')
+            phyreg_id = row[1]
+            outdir_path = '%s/%s/Outputs' % (results_path, name)
+            if not os.path.exists(outdir_path):
+                continue
+            arcpy.SelectLayerByAttribute_management(naipqq_layer,
+                    where_clause="%s like '%%,%d,%%'" % (naipqq_phyregs_field,
+                        phyreg_id))
+            with arcpy.da.SearchCursor(naipqq_layer,
+                    [naipqq_oid_field, 'FileName']) as cur2:
+                for row2 in sorted(cur2):
+                    oid = row2[0]
+                    filename = row2[1][:-13]
+                    frtiffile_path = '%s/fr%s.tif' % (outdir_path, filename)
+                    cfrtiffile_path = '%s/cfr%s.tif' % (outdir_path, filename)
+                    if os.path.exists(cfrtiffile_path):
+                        continue
+                    if os.path.exists(frtiffile_path):
+                        arcpy.SelectLayerByAttribute_management(naipqq_layer,
+                                where_clause='%s=%d' % (naipqq_oid_field, oid))
+                        arcpy.gp.ExtractByMask_sa(frtiffile_path, naipqq_layer,
+                                cfrtiffile_path)
 
     # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
@@ -527,5 +577,48 @@ def add_naip(gt_point):
             arcpy.MakeRasterLayer_management(infile_path, tmp)
 
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
+
+    print('Completed')
+
+def canopy_tif_to_shp(phyreg_id):
+
+    phyregs_layer = canopy_config.phyregs_layer
+    analysis_year = canopy_config.analysis_year
+    snaprast_path = canopy_config.snaprast_path
+    results_path = canopy_config.results_path
+
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.snapRaster = snaprast_path
+
+    arcpy.SelectLayerByAttribute_management(phyregs_layer,
+                                            where_clause='PHYSIO_ID in (%s)' % ','.join(
+                                                map(str, phyreg_id)))
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
+        for row in cur:
+            name = row[0]
+            print(name)
+            name = name.replace(' ', '_').replace('-', '_')
+            phyreg_id = row[1]
+            outdir_path = '%s/%s/Outputs' % (results_path, name)
+            if not os.path.exists(outdir_path):
+                continue
+            canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
+                                                      analysis_year, name)
+            # name of corrected regions just add corrected_ as prefix
+            canopyshp_path = '%s/shp_canopy_%d_%s.shp' % (
+                outdir_path, analysis_year, name)
+            if not os.path.exists(canopytif_path):
+                continue
+            if os.path.exists(canopyshp_path):
+                continue
+            if not os.path.exists(canopyshp_path):
+                # switch 1 and 0
+                arcpy.RasterToPolygon(canopytif_path, canopyshp_path, 'NO_SIMPLIFY')
+                # copy raster is used as arcpy.save does not give bit options.
+                # arcpy.CopyRaster_management(corrected, corrected_path,
+                #                             pixel_type='2_BIT')
+
+    # clear selection
+    arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
 
     print('Completed')
