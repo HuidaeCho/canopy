@@ -307,7 +307,7 @@ def mosaic_clipped_final_tiles(phyreg_ids):
 
     print('Completed')
 
-def convert_afe_to_canopy_tiff(phyreg_ids):
+def convert_afe_to_canopy_tif(phyreg_ids):
     '''
     This function is a wrapper function that converts AFE outputs to the final
     canopy TIFF file by invoking convert_afe_to_final_tiles(),
@@ -319,7 +319,7 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def correct_inverted_canopy_tiff(inverted_phyreg_ids):
+def correct_inverted_canopy_tif(inverted_phyreg_ids):
     '''
     This function corrects the values of mosaikced and clipped regions that
     have been inverted with values canopy 0 and noncanopy 1, and changes them
