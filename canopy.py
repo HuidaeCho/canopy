@@ -419,7 +419,6 @@ def correct_inverted_canopy_tiff(inverted_phyreg_ids):
 
     print('Completed')
 
-
 def convert_canopy_tif_to_shp(phyreg_id):
 
     phyregs_layer = canopy_config.phyregs_layer
@@ -446,17 +445,21 @@ def convert_canopy_tif_to_shp(phyreg_id):
                                                       analysis_year, name)
             corrected_path = '%s/corrected_canopy_%d_%s.tif' % (
                 outdir_path, analysis_year, name)
+            # Add shp_ as prefix to output shapefile
             canopyshp_path = '%s/shp_canopy_%d_%s.shp' % (
                 outdir_path, analysis_year, name)
-
             if os.path.exists(canopyshp_path):
                 continue
             if not os.path.exists(canopyshp_path):
+                # Check for corrected inverted TIFF first
                 if os.path.exists(corrected_path):
+                    # Do not simplify polygons, keep cell extents
                     arcpy.RasterToPolygon_conversion(corrected_path,
                             canopyshp_path, 'NO_SIMPLIFY', 'Value')
                     continue
+                # If no corrected inverted TIFF use orginial canopy TIFF
                 elif os.path.exists(canopytif_path):
+                    # Do not simplify polygons, keep cell extents
                     arcpy.RasterToPolygon_conversion(canopytif_path,
                             canopyshp_path, 'NO_SIMPLIFY', 'Value')
                     continue
@@ -465,7 +468,6 @@ def convert_canopy_tif_to_shp(phyreg_id):
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
 
     print('Completed')
-
 
 def calculate_row_column(xy, rast_ext, rast_res):
     '''
@@ -628,4 +630,3 @@ def add_naip(gt_point):
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
 
     print('Completed')
-
