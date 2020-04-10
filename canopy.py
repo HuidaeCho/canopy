@@ -420,7 +420,15 @@ def correct_inverted_canopy_tiff(inverted_phyreg_ids):
     print('Completed')
 
 def convert_canopy_tif_to_shp(phyreg_id):
+    '''
+    This function converts the canopy TIFF files to shapefile. If a region
+    has been corrected for inverted values the function will convert the
+    corrected TIFF to shapefile instead of the original canopy TIFF. If no
+    corrected TIFF exists for a region then the original canopy TIFF will be
+    converted.
 
+    phyreg_ids: list of physiographic region IDs to process
+    '''
     phyregs_layer = canopy_config.phyregs_layer
     analysis_year = canopy_config.analysis_year
     snaprast_path = canopy_config.snaprast_path
