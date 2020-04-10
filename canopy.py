@@ -307,7 +307,7 @@ def mosaic_clipped_final_tiles(phyreg_ids):
 
     print('Completed')
 
-def convert_afe_to_canopy_tiff(phyreg_ids):
+def convert_afe_to_canopy_tif(phyreg_ids):
     '''
     This function is a wrapper function that converts AFE outputs to the final
     canopy TIFF file by invoking convert_afe_to_final_tiles(),
@@ -319,7 +319,7 @@ def convert_afe_to_canopy_tiff(phyreg_ids):
     clip_final_tiles(phyreg_ids)
     mosaic_clipped_final_tiles(phyreg_ids)
 
-def correct_inverted_canopy_tiff(inverted_phyreg_ids):
+def correct_inverted_canopy_tif(inverted_phyreg_ids):
     '''
     This function corrects the values of mosaikced and clipped regions that
     have been inverted with values canopy 0 and noncanopy 1, and changes them
@@ -361,7 +361,72 @@ def correct_inverted_canopy_tiff(inverted_phyreg_ids):
                 corrected = 1 - arcpy.Raster(canopytif_path)
                 # copy raster is used as arcpy.save does not give bit options.
                 arcpy.CopyRaster_management(corrected, corrected_path,
-                        pixel_type='2_BIT')
+                                            nodata_value = '3',
+                                            pixel_type='2_BIT')
+
+    # clear selection
+    arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
+
+    print('Completed')
+
+def convert_canopy_tif_to_shp(phyreg_id):
+    '''
+    This function converts the canopy TIFF files to shapefile. If a region
+    has been corrected for inverted values the function will convert the
+    corrected TIFF to shapefile instead of the original canopy TIFF. If no
+    corrected TIFF exists for a region then the original canopy TIFF will be
+    converted.
+
+    phyreg_ids: list of physiographic region IDs to process
+    '''
+    phyregs_layer = canopy_config.phyregs_layer
+    analysis_year = canopy_config.analysis_year
+    snaprast_path = canopy_config.snaprast_path
+    results_path = canopy_config.results_path
+
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.snapRaster = snaprast_path
+
+    arcpy.SelectLayerByAttribute_management(phyregs_layer,
+            where_clause='PHYSIO_ID in (%s)' % ','.join(
+                map(str, phyreg_id)))
+    with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
+        for row in cur:
+            name = row[0]
+            print(name)
+            name = name.replace(' ', '_').replace('-', '_')
+            phyreg_id = row[1]
+            outdir_path = '%s/%s/Outputs' % (results_path, name)
+            if not os.path.exists(outdir_path):
+                continue
+            canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
+                                                      analysis_year, name)
+            corrected_path = '%s/corrected_canopy_%d_%s.tif' % (
+                outdir_path, analysis_year, name)
+            # Add shp_ as prefix to output shapefile
+            canopyshp_path = '%s/shp_canopy_%d_%s.shp' % (
+                outdir_path, analysis_year, name)
+            if os.path.exists(canopyshp_path):
+                continue
+            if not os.path.exists(canopyshp_path):
+                # Check for corrected inverted TIFF first
+                if os.path.exists(corrected_path):
+                    # Do not simplify polygons, keep cell extents
+                    arcpy.RasterToPolygon_conversion(corrected_path,
+                            canopyshp_path, 'NO_SIMPLIFY', 'Value')
+                # If no corrected inverted TIFF use orginial canopy TIFF
+                elif os.path.exists(canopytif_path):
+                    # Do not simplify polygons, keep cell extents
+                    arcpy.RasterToPolygon_conversion(canopytif_path,
+                            canopyshp_path, 'NO_SIMPLIFY', 'Value')
+                # Add 'Canopy' field
+                arcpy.management.AddField(canopyshp_path, 'Canopy', 'SHORT',
+                                          field_length='1')
+                # Calculate 'Canopy' field
+                arcpy.management.CalculateField(canopyshp_path, 'Canopy',
+                                                '!gridcode!')
+                # Remove Id and gridcode fields
+                arcpy.DeleteField_management(canopyshp_path, ['Id', 'gridcode'])
 
     # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
