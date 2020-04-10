@@ -414,13 +414,19 @@ def convert_canopy_tif_to_shp(phyreg_id):
                     # Do not simplify polygons, keep cell extents
                     arcpy.RasterToPolygon_conversion(corrected_path,
                             canopyshp_path, 'NO_SIMPLIFY', 'Value')
-                    continue
                 # If no corrected inverted TIFF use orginial canopy TIFF
                 elif os.path.exists(canopytif_path):
                     # Do not simplify polygons, keep cell extents
                     arcpy.RasterToPolygon_conversion(canopytif_path,
                             canopyshp_path, 'NO_SIMPLIFY', 'Value')
-                    continue
+                # Add 'Canopy' field
+                arcpy.management.AddField(canopyshp_path, 'Canopy', 'SHORT',
+                                          field_length='1')
+                # Calculate 'Canopy' field
+                arcpy.management.CalculateField(canopyshp_path, 'Canopy',
+                                                '!gridcode!')
+                # Remove Id and gridcode fields
+                arcpy.DeleteField_management(canopyshp_path, ['Id', 'gridcode'])
 
     # clear selection
     arcpy.SelectLayerByAttribute_management(phyregs_layer, 'CLEAR_SELECTION')
