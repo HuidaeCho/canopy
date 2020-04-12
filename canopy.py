@@ -114,6 +114,9 @@ def reproject_input_tiles(phyreg_ids):
                 if not os.path.exists(outdir_path[:-7]):
                     os.mkdir(outdir_path[:-7])
                 os.mkdir(outdir_path)
+            future_outdir_path = '%s/%s/Outputs' % (results_path, name)
+            if not os.path.exists(future_outdir_path):
+                os.mkdir(future_outdir_path)
             arcpy.SelectLayerByAttribute_management(naipqq_layer,
                     where_clause="%s like '%%,%d,%%'" % (naipqq_phyregs_field,
                         phyreg_id))
