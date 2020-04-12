@@ -159,8 +159,8 @@ def convert_afe_to_final_tiles(phyreg_ids):
             name = name.replace(' ', '_').replace('-', '_')
             phyreg_id = row[1]
             outdir_path = '%s/%s/Outputs' % (results_path, name)
-            if not os.path.exists(outdir_path):
-                continue
+            if len(os.listdir(outdir_path)) == 0:
+            	continue
             arcpy.SelectLayerByAttribute_management(naipqq_layer,
                     where_clause="%s like '%%,%d,%%'" % (naipqq_phyregs_field,
                         phyreg_id))
@@ -213,8 +213,8 @@ def clip_final_tiles(phyreg_ids):
             name = name.replace(' ', '_').replace('-', '_')
             phyreg_id = row[1]
             outdir_path = '%s/%s/Outputs' % (results_path, name)
-            if not os.path.exists(outdir_path):
-                continue
+            if len(os.listdir(outdir_path)) == 0:
+            	continue
             arcpy.SelectLayerByAttribute_management(naipqq_layer,
                     where_clause="%s like '%%,%d,%%'" % (naipqq_phyregs_field,
                         phyreg_id))
@@ -267,8 +267,8 @@ def mosaic_clipped_final_tiles(phyreg_ids):
             name = name.replace(' ', '_').replace('-', '_')
             phyreg_id = row[1]
             outdir_path = '%s/%s/Outputs' % (results_path, name)
-            if not os.path.exists(outdir_path):
-                continue
+            if len(os.listdir(outdir_path)) == 0:
+            	continue
             canopytif_path = '%s/canopy_%d_%s.tif' % (outdir_path,
                 analysis_year, name)
             if os.path.exists(canopytif_path):
