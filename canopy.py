@@ -524,7 +524,7 @@ def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
             arcpy.CreateRandomPoints_management(outdir_path, tmp_shp_filename,
                     phyregs_layer, '', point_count)
 
-            # create a new field to store data for ground thruthing
+            # create a new field to store data for ground truthing
             gt_field = 'GT'
             arcpy.AddField_management(tmp_shp_path, gt_field, 'SHORT')
 
