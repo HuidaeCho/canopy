@@ -460,7 +460,8 @@ def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
     the GT field in the output shapefile.
 
     phyreg_ids:     list of physiographic region IDs to process
-    point_density:  number of points per square kilometer
+    min_area_sqkm:  miminum area in square kilometers
+    max_area_sqkm:  maximum area in square kilometers
     max_points:     maximum number of points allowed
     min_points:     minimum number of points allowed
     '''
@@ -503,7 +504,7 @@ def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
             point_count = int(min_points + (max_points - min_points) /
                 (max_area_sqkm - min_area_sqkm) * (area_sqkm - min_area_sqkm)
                  + 1)
-            
+
             print('Raw point count: %d' % point_count)
             if point_count < min_points:
                 point_count = min_points
