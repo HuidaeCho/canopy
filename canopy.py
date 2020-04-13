@@ -453,8 +453,8 @@ def calculate_row_column(xy, rast_ext, rast_res):
     col = int((x - rast_ext.XMin) / w)
     return row, col
 
-def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
-        min_points=200):
+def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
+                                    max_points=400, min_points=200):
     '''
     This function generates randomized points for ground truthing. It create
     the GT field in the output shapefile.
@@ -500,7 +500,10 @@ def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
             area_sqkm = row[2]
 
             # +1 to count partial points; e.g., 0.1 requires one point
-            point_count = int(point_density * area_sqkm + 1)
+            point_count = int(min_points + (max_points - min_points) /
+                (max_area_sqkm - min_area_sqkm) * (area_sqkm - min_area_sqkm)
+                 + 1)
+            
             print('Raw point count: %d' % point_count)
             if point_count < min_points:
                 point_count = min_points
