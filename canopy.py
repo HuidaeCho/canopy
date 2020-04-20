@@ -454,7 +454,7 @@ def calculate_row_column(xy, rast_ext, rast_res):
     return row, col
 
 def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
-                                    max_points=400, min_points=200):
+                                    min_points, max_points):
     '''
     This function generates randomized points for ground truthing. It create
     the GT field in the output shapefile.
@@ -462,10 +462,15 @@ def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
     phyreg_ids:     list of physiographic region IDs to process
     min_area_sqkm:  miminum area in square kilometers
     max_area_sqkm:  maximum area in square kilometers
-    max_points:     maximum number of points allowed
     min_points:     minimum number of points allowed
+    max_points:     maximum number of points allowed
     '''
-    # fix a user error, if any
+    # fix user errors, if any
+    if min_area_sqkm > max_area_sqkm:
+        tmp = min_area_sqkm
+        min_area_sqkm = max_area_sqkm
+        max_area_sqkm = tmp
+
     if min_points > max_points:
         tmp = min_points
         min_points = max_points
