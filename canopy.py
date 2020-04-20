@@ -453,14 +453,15 @@ def calculate_row_column(xy, rast_ext, rast_res):
     col = int((x - rast_ext.XMin) / w)
     return row, col
 
-def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
-        min_points=200):
+def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
+                                    max_points=400, min_points=200):
     '''
     This function generates randomized points for ground truthing. It create
     the GT field in the output shapefile.
 
     phyreg_ids:     list of physiographic region IDs to process
-    point_density:  number of points per square kilometer
+    min_area_sqkm:  miminum area in square kilometers
+    max_area_sqkm:  maximum area in square kilometers
     max_points:     maximum number of points allowed
     min_points:     minimum number of points allowed
     '''
@@ -500,7 +501,10 @@ def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
             area_sqkm = row[2]
 
             # +1 to count partial points; e.g., 0.1 requires one point
-            point_count = int(point_density * area_sqkm + 1)
+            point_count = int(min_points + (max_points - min_points) /
+                (max_area_sqkm - min_area_sqkm) * (area_sqkm - min_area_sqkm)
+                 + 1)
+
             print('Raw point count: %d' % point_count)
             if point_count < min_points:
                 point_count = min_points
@@ -520,7 +524,7 @@ def generate_ground_truthing_points(phyreg_ids, point_density, max_points=400,
             arcpy.CreateRandomPoints_management(outdir_path, tmp_shp_filename,
                     phyregs_layer, '', point_count)
 
-            # create a new field to store data for ground thruthing
+            # create a new field to store data for ground truthing
             gt_field = 'GT'
             arcpy.AddField_management(tmp_shp_path, gt_field, 'SHORT')
 
