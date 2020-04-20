@@ -580,20 +580,20 @@ def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
 
     print('Completed')
 
-def add_naip(gt_point):
+def add_naip(gt_points):
     '''
-    This function adds naip imagery where a groundtruthing point is located
+    This function adds NAIP imagery where a ground truthing point is located
     into an arcgis project. Imagery is saved as a temporary layer. Functional
     in both ArcMap & ArcGIS Pro.
 
-    Parameters:
-    gt_point: name of ground truhting point shapefile to add naip based off of
+    gt_points: name of ground truthing points feature class to add NAIP based
+    off of
     '''
     naipqq_layer = canopy_config.naipqq_layer
     naip_path = canopy_config.naip_path
 
     arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
-    arcpy.SelectLayerByLocation_management(naipqq_layer, 'INTERSECT', gt_point)
+    arcpy.SelectLayerByLocation_management(naipqq_layer, 'INTERSECT', gt_points)
 
     with arcpy.da.SearchCursor(naipqq_layer, ['FileName']) as cur:
         for row in sorted(cur):
