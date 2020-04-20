@@ -74,7 +74,7 @@ def assign_phyregs_to_naipqq():
 
     print('Completed')
 
-def reproject_input_tiles(phyreg_ids):
+def reproject_naip_tiles(phyreg_ids):
     '''
     This function reprojects and snaps the NAIP tiles that intersect selected
     physiographic regions.
@@ -453,8 +453,8 @@ def calculate_row_column(xy, rast_ext, rast_res):
     col = int((x - rast_ext.XMin) / w)
     return row, col
 
-def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
-                                    min_points, max_points):
+def generate_gtpoints(phyreg_ids, min_area_sqkm, max_area_sqkm, min_points,
+                      max_points):
     '''
     This function generates randomized points for ground truthing. It create
     the GT field in the output shapefile.
@@ -580,7 +580,7 @@ def generate_ground_truthing_points(phyreg_ids, min_area_sqkm, max_area_sqkm,
 
     print('Completed')
 
-def add_naip(gtpoints):
+def add_naip_tiles_for_gt(gtpoints):
     '''
     This function adds NAIP imagery where a ground truthing point is located
     into an arcgis project. Imagery is saved as a temporary layer. Functional
