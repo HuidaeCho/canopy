@@ -20,8 +20,8 @@ using ArcGIS and Feature Analyst.
 
 * Huidae Cho, Ph.D., Assistant Professor of Geospatial Science and Computing,
   IESA, UNG
-* Jennifer McCollum, Undergraduate Student, IESA, UNG
 * Owen Smith, Undergraduate Student, IESA, UNG
+* Jennifer McCollum, Undergraduate Student, IESA, UNG
 
 ## Acknowledgement
 
