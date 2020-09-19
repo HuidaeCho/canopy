@@ -1,5 +1,7 @@
+config_template = """
+
 ################################################################################
-# Name:    canopy_config-example.py
+# Name:    config_template.py
 # Purpose: This module provides example configurations for the canopy.py
 #          module. Please copy this file to canopy_config.py and edit the
 #          latter.
@@ -9,6 +11,8 @@
 #          Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project
 ################################################################################
 
+[config]
+
 # This input layer contains the polygon features for all physiographic regions.
 # Data source: Physiographic_Districts_GA.zip
 #              Michael Torbett, GFC, October 3, 2019 at 10:48am
@@ -16,22 +20,22 @@
 #   NAME (Text)
 #   PHYSIO_ID (Long)
 #   AREA (Float)
-phyregs_layer = 'Physiographic_Districts_GA'
+phyregs_layer = Physiographic_Districts_GA
 
 # This output double field will be created in the phyregs layer by
 # assign_phyregs_to_naipqq().
-phyregs_area_sqkm_field = 'AREA_SQKM'
+phyregs_area_sqkm_field = AREA_SQKM
 
 # This input layer contains the polygon features for all NAIP tiles.
 # Data source: ga_naip09qq.zip
 #              David Parry, USDA, September 30, 2019 at 9:48am
 # Required field:
 #   FileName (Text)
-naipqq_layer = 'naip_ga_2009_1m_m4b'
+naipqq_layer = naip_ga_2009_1m_m4b
 
 # This output text field will be created in the naipqq layer by
 # assign_phyregs_to_naipqq().
-naipqq_phyregs_field = 'PHYREGS'
+naipqq_phyregs_field = PHYREGS
 
 # The structure of this input folder is defined by USDA, the original source of
 # NAIP imagery. Under this folder are multiple 5-digit numeric folders that
@@ -46,7 +50,7 @@ naipqq_phyregs_field = 'PHYREGS'
 #                       m_3408407_nw_16_1_20090930.tif
 #                       ...
 #                 ...
-naip_path = 'F:/Georgia/ga'
+naip_path = F:/Georgia/ga
 
 # Well-Known IDs (WKIDs) are numeric identifiers for coordinate systems
 # administered by Esri.  This variable specifies the target spatial reference
@@ -91,27 +95,27 @@ spatref_wkid = 102039
 #          ...
 
 # This variable specifies the path to the project root folder.
-project_path = 'C:/work/Research/GFC Canopy Assessment'
-
-# This variable specifies the format of the analysis path for one year.
-analysis_path_format = '%s/%%d Analysis' % project_path
+project_path = C:/work/Research/GFC Canopy Assessment
 
 # This variable specifies the year for analysis.
 analysis_year = 2009
 
+# This variable specifies the format of the analysis path for one year.
+analysis_path_format = %(project_path)s/%(analysis_year)s Analysis
+
 # This variable is used only in this file to define snaprast_path and
 # results_path.
-analysis_path = analysis_path_format % analysis_year
+analysis_path = %(analysis_path_format)s
 
 # This input/output raster is used to snap NAIP tiles to a consistent grid
 # system. If this file does not already exist, the filename part of
 # snaprast_path must be 'r' + the filename of an existing original NAIP tile so
 # that reproject_input_tiles() can automatically create it based on the folder
 # structure of the NAIP imagery data (naip_path).
-snaprast_path = '%s/Data/rm_3408504_nw_16_1_20090824.tif' % analysis_path
+snaprast_path = %(analysis_path)s/Data/rm_3408504_nw_16_1_20090824.tif
 
 # This folder will contain all result files.
-results_path = '%s/Results' % analysis_path
+results_path = %(analysis_path)s/Results 
 
 # This list contains all physiographic region IDs, but it is not used at all.
 # reproject_input_tiles(), convert_afe_to_final_tiles(), clip_final_tiles(),
@@ -123,3 +127,5 @@ phyreg_ids = [8,7,2,14,22,5,4,12,9,11,20,3,6,26,13,17,24,25,15,23,21,16,18,19]
 # This list contains physiographic region IDs whose trained model produces an
 # inverted result.
 inverted_phyreg_ids = [5, 21, 12, 4, 11, 17, 2, 26, 20, 16]
+
+"""
