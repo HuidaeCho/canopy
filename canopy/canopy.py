@@ -74,10 +74,10 @@ class Canopy:
 
     def assign_phyregs_to_naipqq(self):
         '''
-        This function adds the phyregs field to the NAIP QQ shapefile and populates
-        it with physiographic region IDs that intersect each NAIP tile. This
-        function needs to be run only once, but running it multiple times would not
-        hurt either other than wasting computational resources.
+        This function adds the phyregs field to the NAIP QQ shapefile and
+        populates it with physiographic region IDs that intersect each NAIP
+        tile. This function needs to be run only once, but running it multiple
+        times would not hurt either other than wasting computational resources.
         '''
         phyregs_layer = self.config.phyregs_layer
         phyregs_area_sqkm_field = self.config.phyregs_area_sqkm_field
