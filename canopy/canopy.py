@@ -631,8 +631,8 @@ class Canopy:
                         ras_a = arcpy.RasterToNumPyArray(ras)
                         # get xy values of point
                         xy = row2[0]
-                        # perform calculate_row_column to get the row and column of
-                        # the point
+                        # perform calculate_row_column to get the row and column
+                        # of the point
                         rc = self.__calculate_row_column(xy, ras.extent, res)
                         # update the point
                         row2[1] = ras_a[rc]
@@ -658,10 +658,11 @@ class Canopy:
     def add_naip_tiles_for_gt(self, gtpoints):
         '''
         This function adds NAIP imagery where a ground truthing point is located
-        into an arcgis project. Imagery is saved as a temporary layer. Functional
-        in both ArcMap & ArcGIS Pro.
+        into an arcgis project. Imagery is saved as a temporary layer.
+        Functional in both ArcMap & ArcGIS Pro.
     
-        gtpoints: name of ground truthing points shapefile to add NAIP based off of
+        gtpoints: name of ground truthing points shapefile to add NAIP based off
+                  of
         '''
         naipqq_layer = self.naipqq_layer
         naip_path = self.naip_path
