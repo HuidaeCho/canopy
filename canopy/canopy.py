@@ -29,6 +29,18 @@ class Canopy:
 
         self.phyregs = []
 
+        self.update_config()
+
+    def generate_config(self, config_path):
+
+        with open(config_path, 'w') as f:
+            f.write(config_template)
+            f.close()
+        print("CanoPy config generated at %s" % config_path)
+        return config_path
+
+    def update_config(self):
+
         conf = ConfigParser()
         conf.read(self.config)
         self.phyregs_layer = str.strip(conf.get('config', 'phyregs_layer'))
@@ -42,14 +54,6 @@ class Canopy:
         self.snaprast_path = str.strip(conf.get('config', 'snaprast_path'))
         self.results_path = str.strip(conf.get('config', 'results_path'))
         self.analysis_year = int(conf.get('config', 'analysis_year'))
-
-    def generate_config(self, config_path):
-
-        with open(config_path, 'w') as f:
-            f.write(config_template)
-            f.close()
-        print("CanoPy config generated at %s" % config_path)
-        return config_path
 
     def regions(self, phyregs):
         for i in range(len(phyregs)):
