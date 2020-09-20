@@ -83,10 +83,10 @@ class Canopy:
         tile. This function needs to be run only once, but running it multiple
         times would not hurt either other than wasting computational resources.
         '''
-        phyregs_layer = self.config.phyregs_layer
-        phyregs_area_sqkm_field = self.config.phyregs_area_sqkm_field
-        naipqq_layer = self.config.naipqq_layer
-        naipqq_phyregs_field = self.config.naipqq_phyregs_field
+        phyregs_layer = self.phyregs_layer
+        phyregs_area_sqkm_field = self.phyregs_area_sqkm_field
+        naipqq_layer = self.naipqq_layer
+        naipqq_phyregs_field = self.naipqq_phyregs_field
 
         # calculate phyregs_area_sqkm_field
         fields = arcpy.ListFields(phyregs_layer, phyregs_area_sqkm_field)
