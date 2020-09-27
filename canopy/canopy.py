@@ -32,6 +32,10 @@ class Canopy:
         self.update_config()
 
     def generate_config(self, config_path):
+        '''
+        Generates a *.cfg file at the specified configuration path if none is
+        already there.
+        '''
 
         with open(config_path, 'w') as f:
             f.write(config_template)
@@ -40,7 +44,12 @@ class Canopy:
         return config_path
 
     def update_config(self):
-
+        '''
+        Updates the configuartion parameters within the Canopy object if changes
+        have been made to the *.cfg file. This allows for changes to be made to
+        the overall configuration with out the object or the python environment
+        having to be reinitalized.
+        '''
         conf = ConfigParser()
         conf.read(self.config)
         self.phyregs_layer = str.strip(conf.get('config', 'phyregs_layer'))
@@ -50,7 +59,7 @@ class Canopy:
         self.naipqq_phyregs_field = str.strip(conf.get('config',
                                                        'naipqq_phyregs_field'))
         self.naip_path = str.strip(conf.get('config', 'naip_path'))
-        self.spatref_wkid = str.strip(conf.get('config', 'spatref_wkid'))
+        self.spatref_wkid = int(conf.get('config', 'spatref_wkid'))
         self.snaprast_path = str.strip(conf.get('config', 'snaprast_path'))
         self.results_path = str.strip(conf.get('config', 'results_path'))
         self.analysis_year = int(conf.get('config', 'analysis_year'))
@@ -166,8 +175,13 @@ class Canopy:
         arcpy.env.addOutputsToMap = False
         if not os.path.exists(snaprast_path):
             snaprast_file = os.path.basename(snaprast_path)
-            infile_path = '%s/%s/%s' % (naip_path, snaprast_file[3:8],
-                    snaprast_file[1:])
+            # Account for different filename lengths between years
+            if len(snaprast_file) == 28:
+                infile_path = '%s/%s/%s' % (naip_path, snaprast_file[2:7],
+                                            snaprast_file)
+            if len(snaprast_file) == 26:
+                infile_path = '%s/%s/%s' % (naip_path, snaprast_file[3:8],
+                                            snaprast_file[1:])
             arcpy.ProjectRaster_management(infile_path, snaprast_path, spatref)
         arcpy.env.snapRaster = snaprast_path
 
@@ -198,6 +212,12 @@ class Canopy:
                         filename = '%s.tif' % row2[0][:-13]
                         folder = filename[2:7]
                         infile_path = '%s/%s/%s' % (naip_path, folder, filename)
+                        ########
+                        # Continue if path does not exist to allow for testing
+                        # of sample area
+                        if not os.path.exists(infile_path):
+                            continue
+                        ########
                         outfile_path = '%s/r%s' % (outdir_path, filename)
                         if not os.path.exists(outfile_path):
                             arcpy.ProjectRaster_management(infile_path,
@@ -222,6 +242,9 @@ class Canopy:
         naipqq_phyregs_field = self.naipqq_phyregs_field
         snaprast_path = self.snaprast_path
         results_path = self.results_path
+
+        # Determine raster cellsize and make sure it is enforced through out
+        cell = arcpy.GetRasterProperties_management(snaprast_path, 'CELLSIZE')
 
         arcpy.env.addOutputsToMap = False
         arcpy.env.snapRaster = snaprast_path
@@ -248,16 +271,29 @@ class Canopy:
                         filename = row2[0][:-13]
                         rshpfile_path = '%s/r%s.shp' % (outdir_path, filename)
                         rtiffile_path = '%s/r%s.tif' % (outdir_path, filename)
+                        # Use legacy memory workspace
+                        temp_tif = 'in_memory/fr%s' % (filename)
                         frtiffile_path = '%s/fr%s.tif' % (outdir_path, filename)
                         if os.path.exists(frtiffile_path):
                             continue
                         if os.path.exists(rshpfile_path):
                             arcpy.FeatureToRaster_conversion(rshpfile_path,
-                                    'CLASS_ID', frtiffile_path, 1)
+                                    'CLASS_ID', temp_tif)
+                            ########
+                            # reclass = arcpy.Resample_management(temp_tif,
+                            #                                     frtiffile_path,
+                            #                                     cell,
+                            #                                     'MAJORITY')
+                            ########
                         elif os.path.exists(rtiffile_path):
                             arcpy.Reclassify_3d(rtiffile_path, 'Value',
-                                                '1 0;2 1', frtiffile_path)
-
+                                                '1 0;2 1', temp_tif)
+                            ########
+                            # reclass = arcpy.Resample_management(temp_tif,
+                            #                                     frtiffile_path,
+                            #                                     cell,
+                            #                                     'MAJORITY')
+                            ########
         # clear selection
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                                                 'CLEAR_SELECTION')
@@ -278,7 +314,8 @@ class Canopy:
         snaprast_path = self.snaprast_path
         results_path = self.results_path
 
-        naipqq_oid_field = arcpy.Describe(naipqq_layer).OIDFieldName.encode()
+        # Get inmutiable ID's, does not need to be encoded.
+        naipqq_oid_field = arcpy.Describe(naipqq_layer).OIDFieldName
 
         arcpy.env.addOutputsToMap = False
         arcpy.env.snapRaster = snaprast_path
@@ -311,6 +348,12 @@ class Canopy:
                             outdir_path, filename)
                         if os.path.exists(cfrtiffile_path):
                             continue
+                        ########
+                        # Skip file path if it does not exist to allow for small
+                        # area testing
+                        if not os.path.exists(frtiffile_path):
+                            continue
+                        ########
                         if os.path.exists(frtiffile_path):
                             arcpy.SelectLayerByAttribute_management(naipqq_layer,
                                     where_clause='%s=%d' % (
@@ -374,12 +417,14 @@ class Canopy:
                             filename = row2[0][:-13]
                             cfrtiffile_path = '%s/cfr%s.tif' % (outdir_path,
                                     filename)
+                            ########
                             if not os.path.exists(cfrtiffile_path):
-                                input_rasters = ''
-                                break
+                                input_rasters += ''
                             if input_rasters is not '':
                                 input_rasters += ';'
-                            input_rasters += "'%s'" % cfrtiffile_path
+                            if os.path.exists(cfrtiffile_path):
+                                input_rasters += "'%s'" % cfrtiffile_path
+                            ########
                     if input_rasters == '':
                         continue
                     arcpy.MosaicToNewRaster_management(input_rasters,
