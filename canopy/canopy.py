@@ -111,9 +111,11 @@ class Canopy:
                 automatically generated using the template configuration.
         '''
 
+        # Add .cfg extentsion to file path if not present
         if not os.path.splitext(config_path)[1] == '.cfg':
             config_path = '%s%s' % (config_path, '.cfg')
 
+        # Generate template configuration file if file path does not exist.
         if os.path.exists(config_path):
             self.config = config_path
         if not os.path.exists(config_path):
@@ -129,7 +131,7 @@ class Canopy:
         ----------
             config_path : str
         '''
-
+        # Write config file template
         with open(config_path, 'w') as f:
             f.write(config_template)
             f.close()
@@ -143,8 +145,11 @@ class Canopy:
         the overall configuration with out the object or the python environment
         having to be reinitalized.
         '''
+        # Open configuration file with configparser
         conf = ConfigParser()
         conf.read(self.config)
+
+        # Get individual attributes from configuration
         self.phyregs_layer = str.strip(conf.get('config', 'phyregs_layer'))
         self.phyregs_area_sqkm_field = str.strip(conf.get('config',
                                                     'phyregs_area_sqkm_field'))
@@ -168,7 +173,7 @@ class Canopy:
             phyregs : list
                 List of physiographic region id's to be processed with CanoPy.
         '''
-
+        # Populate phyregs_ids
         self.phyreg_ids = []
         for i in range(len(phyregs)):
             self.phyreg_ids.append(phyregs[i])
@@ -182,7 +187,7 @@ class Canopy:
         ----------
             xy : list, tuple
                 (x, y) coordinates
-            rast_ext : int
+            rast_ext :
                 raster extent
             rast_res : list, tuple
                 (width, height) raster resolution
