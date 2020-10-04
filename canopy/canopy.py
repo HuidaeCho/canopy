@@ -15,8 +15,101 @@ from configparser import ConfigParser
 
 
 class Canopy:
+    '''
+    Object to effectively manage the configuration of CanoPy and run
+    the processing functions created.
+
+    Attributes
+    ----------
+    config : str
+        Path for initialized configuration file.
+    phyregs_layer : str
+        Layer containing polygon features for all physiographic regions.
+    phyregs_area_sqkm_field : str
+        Field name for computed area.
+    naipqq_layer : str
+        Name of the NAIP QQ feature layer.
+    naipqq_phyregs_field : str
+        Field name to make NAIP QQ's queryable based on physiographic
+        region.
+    naip_path : str
+        Path to NAIP directory
+    spatref_wkid : int
+        WKID specifies the target spatial reference for all output files.
+    snaprast_path : str
+        This input/output raster is used to snap NAIP tiles to a
+        consistent grid system. If this file does not already exist, the
+        filename part of snaprast_path must be 'r' + the filename of an
+        existing original NAIP tile so that reproject_input_tiles() can
+        automatically create it based on the folder structure of the
+        NAIP imagery data (naip_path).
+    snaprast_path_1m : str
+        The same as 'snaprast_path' but to snap newer NAIP data with
+        higher spatial resolutions to the previous years grids for
+        proper comparison. This path must be of raster with a previous
+        years 1m grid if the original data is less than 1m in resolution.
+    snap_grid_1m : bool
+        Boolean which determines whether or not to snap to the previous
+        years grids.
+    results_path : str
+        Folder which will contain all outputs.
+    analysis_year : int
+        Specifies which year is being analyzed.
+    phyreg_ids : list
+        List of phyreg ids to process.
+
+    Methods
+    -------
+    gen_cfg(config_path):
+        Generates a template configuration file at the specified location.
+    reload_cfg():
+        Allows the Canopy attributes from the configuration file to be
+        reloaded if the file has been changed.
+    regions(phyregs):
+        Adds the desired regions to self.phyreg_ids
+    calculate_row_column(xy, rast_ext, rast_res):
+        Calculates array row and column using x, y, extent, and
+        resolution.
+    assign_phyregs_to_naipqq():
+        Adds the phyregs field to the NAIP QQ shapefile and
+        populates it with physiographic region IDs that intersect each NAIP
+        tile.
+    reproject_naip_tiles():
+        Function reprojects and snaps the NAIP tiles that intersect
+        selected physiographic regions.
+    convert_afe_to_final_tiles():
+        Converts AFE outputs to final TIFF files.
+    clip_final_tiles():
+        Clips final TIFF files.
+    mosaic_clipped_final_tiles():
+        Mosaics clipped final TIFF files and clips mosaicked files
+        to physiographic regions.
+    convert_afe_to_canopy_tif():
+        A wrapper function that converts AFE outputs to the
+        final canopy TIFF file by invoking convert_afe_to_final_tiles(),
+        clip_final_tiles(), and mosaic_clipped_final_tiles() in the correct
+        order.
+    correct_inverted_canopy_tif(inverted_phyreg_ids):
+        Corrects the values of mosaikced and clipped regions that
+        have been inverted.
+    convert_canopy_tif_to_shp():
+        Converts the canopy TIFF files to shapefile.
+    generate_gtpoints(phyreg_ids, min_area_sqkm, max_area_sqkm, min_points,
+                      max_points):
+        Generates randomized points for ground truthing.
+    add_naip_tiles_for_gt(gtpoints):
+        Adds NAIP imagery where a ground truthing point is located.
+    '''
 
     def __init__(self, config_path):
+        '''
+        Parameters
+        ----------
+            config_path : str
+                Path which points to the *.cfg path which serve as the
+                configuration for CanoPy. If one does not exist it will be
+                automatically generated using the template configuration.
+        '''
 
         if not os.path.splitext(config_path)[1] == '.cfg':
             config_path = '%s%s' % (config_path, '.cfg')
@@ -30,8 +123,11 @@ class Canopy:
 
     def gen_cfg(self, config_path):
         '''
-        Generates a *.cfg file at the specified configuration path if none is
-        already there.
+        Generates a template configuration file at the specified location.
+
+        Parameters
+        ----------
+            config_path : str
         '''
 
         with open(config_path, 'w') as f:
@@ -64,18 +160,36 @@ class Canopy:
         self.snap_grid_1m = conf.getboolean('config', 'use_1m_output')
 
     def regions(self, phyregs):
+        '''
+        Adds the desired regions to be generated.
+
+        Parameters
+        ----------
+            phyregs : list
+                List of physiographic region id's to be processed with CanoPy.
+        '''
+
         self.phyreg_ids = []
         for i in range(len(phyregs)):
             self.phyreg_ids.append(phyregs[i])
 
-    def __calculate_row_column(xy, rast_ext, rast_res):
+    def calculate_row_column(xy, rast_ext, rast_res):
         '''
         This function calculates array row and column using x, y, extent, and
         resolution.
 
-        xy:       (x, y) coordinates
-        rast_ext: raster extent
-        rast_res: (width, height) raster resolution
+        Parameters
+        ----------
+            xy : list, tuple
+                (x, y) coordinates
+            rast_ext : int
+                raster extent
+            rast_res : list, tuple
+                (width, height) raster resolution
+
+        Returns
+        -------
+            row, col
         '''
         x = xy[0]
         y = xy[1]
@@ -159,8 +273,6 @@ class Canopy:
         '''
         This function reprojects and snaps the NAIP tiles that intersect
         selected physiographic regions.
-    
-        phyreg_ids: list of physiographic region IDs to process
         '''
         phyregs_layer = self.phyregs_layer
         naipqq_layer = self.naipqq_layer
@@ -235,8 +347,6 @@ class Canopy:
     def convert_afe_to_final_tiles(self):
         '''
         This function converts AFE outputs to final TIFF files.
-    
-        phyreg_ids: list of physiographic region IDs to process
         '''
         phyregs_layer = self.phyregs_layer
         naipqq_layer = self.naipqq_layer
@@ -309,8 +419,6 @@ class Canopy:
     def clip_final_tiles(self):
         '''
         This function clips final TIFF files.
-    
-        phyreg_ids: list of physiographic region IDs to process
         '''
         phyregs_layer = self.phyregs_layer
         naipqq_layer = self.naipqq_layer
@@ -381,8 +489,6 @@ class Canopy:
         '''
         This function mosaics clipped final TIFF files and clips mosaicked files
         to physiographic regions.
-    
-        phyreg_ids: list of physiographic region IDs to process
         '''
         phyregs_layer = self.phyregs_layer
         naipqq_layer = self.naipqq_layer
@@ -461,8 +567,6 @@ class Canopy:
         final canopy TIFF file by invoking convert_afe_to_final_tiles(),
         clip_final_tiles(), and mosaic_clipped_final_tiles() in the correct
         order.
-    
-        phyreg_ids: list of physiographic region IDs to process
         '''
         import time
 
@@ -483,8 +587,11 @@ class Canopy:
         This function corrects the values of mosaikced and clipped regions that
         have been inverted with values canopy 0 and noncanopy 1, and changes
         them to canopy 1 and noncanopy 0.
-    
-        inverted_phyreg_ids: list of physiographic region IDs to process
+
+        Parameters
+        ----------
+            inverted_phyreg_ids : list
+                list of physiographic region IDs to process
         '''
         phyregs_layer = self.phyregs_layer
         analysis_year = self.analysis_year
@@ -541,8 +648,6 @@ class Canopy:
         corrected TIFF to shapefile instead of the original canopy TIFF. If no
         corrected TIFF exists for a region then the original canopy TIFF will be
         converted.
-    
-        phyreg_ids: list of physiographic region IDs to process
         '''
         phyregs_layer = self.phyregs_layer
         analysis_year = self.analysis_year
@@ -605,12 +710,19 @@ class Canopy:
         '''
         This function generates randomized points for ground truthing. It create
         the GT field in the output shapefile.
-    
-        phyreg_ids:     list of physiographic region IDs to process
-        min_area_sqkm:  miminum area in square kilometers
-        max_area_sqkm:  maximum area in square kilometers
-        min_points:     minimum number of points allowed
-        max_points:     maximum number of points allowed
+
+        Parameters
+        ----------
+        phyreg_ids : list
+            list of physiographic region IDs to process
+        min_area_sqkm : float
+            miminum area in square kilometers
+        max_area_sqkm : float
+            maximum area in square kilometers
+        min_points : int
+            minimum number of points allowed
+        max_points : int
+            maximum number of points allowed
         '''
         # fix user errors, if any
         if min_area_sqkm > max_area_sqkm:
@@ -735,9 +847,11 @@ class Canopy:
         This function adds NAIP imagery where a ground truthing point is located
         into an arcgis project. Imagery is saved as a temporary layer.
         Functional in both ArcMap & ArcGIS Pro.
-    
-        gtpoints: name of ground truthing points shapefile to add NAIP based off
-                  of
+
+        Parameters
+        ----------
+        gtpoints : str
+            name of ground truthing points shapefile to add NAIP based off
         '''
         naipqq_layer = self.naipqq_layer
         naip_path = self.naip_path
