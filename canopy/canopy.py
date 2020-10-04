@@ -24,7 +24,7 @@ class Canopy:
         if os.path.exists(config_path):
             self.config = config_path
         if not os.path.exists(config_path):
-            self.generate_cfg(config_path)
+            self.gen_cfg(config_path)
             self.config = config_path
         self.reload_cfg()
 
@@ -42,7 +42,7 @@ class Canopy:
 
     def reload_cfg(self):
         '''
-        Updates the configuartion parameters within the Canopy object if changes
+        Updates the configuration parameters within the Canopy object if changes
         have been made to the *.cfg file. This allows for changes to be made to
         the overall configuration with out the object or the python environment
         having to be reinitalized.
