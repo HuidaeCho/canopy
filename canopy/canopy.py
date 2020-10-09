@@ -97,6 +97,8 @@ class Canopy:
     generate_gtpoints(phyreg_ids, min_area_sqkm, max_area_sqkm, min_points,
                       max_points):
         Generates randomized points for ground truthing.
+    update_gtpoints(self, old_points, phyreg_ids)
+        Copies a previous years GT points but with the new years GT values.
     add_naip_tiles_for_gt(gtpoints):
         Adds NAIP imagery where a ground truthing point is located.
     '''
@@ -178,7 +180,7 @@ class Canopy:
         for i in range(len(phyregs)):
             self.phyreg_ids.append(phyregs[i])
 
-    def calculate_row_column(xy, rast_ext, rast_res):
+    def calculate_row_column(self, xy, rast_ext, rast_res):
         '''
         This function calculates array row and column using x, y, extent, and
         resolution.
@@ -751,6 +753,12 @@ class Canopy:
         arcpy.env.addOutputsToMap = False
         arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
 
+        # use configparser converter to read list
+        conf = ConfigParser(converters={'list': lambda x: [int(i.strip())
+                                                           for i in x.split(',')]})
+        conf.read(self.config)
+        inverted_reg = conf.getlist('config', 'inverted_phyreg_ids')
+
         # make sure to clear selection because most geoprocessing tools use
         # selected features, if any
         arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
@@ -766,9 +774,15 @@ class Canopy:
                 print(name)
                 # CreateRandomPoints cannot create a shapefile with - in its
                 # filename
+
                 name = name.replace(' ', '_').replace('-', '_')
                 phyreg_id = row[1]
                 area_sqkm = row[2]
+
+                # Check if region is inverted
+                for i in range(len(inverted_reg)):
+                    if row[1] == inverted_reg[i]:
+                        inverted = True
 
                 # +1 to count partial points; e.g., 0.1 requires one point
                 point_count = int(min_points + (max_points - min_points) /
@@ -826,9 +840,13 @@ class Canopy:
                         # perform calculate_row_column to get the row and column
                         # of the point
                         rc = self.__calculate_row_column(xy, ras.extent, res)
-                        # update the point
-                        row2[1] = ras_a[rc]
-                        cur2.updateRow(row2)
+                        # update the point, correct inverted region points
+                        if inverted is True:
+                            row2[1] = 1 - ras_a[rc]
+                            cur2.updateRow(row2)
+                        else:
+                            row2[1] = ras_a[rc]
+                            cur.updateRow(row2)
 
                 # delete all fields except only those required
                 shp_desc = arcpy.Describe(shp_path)
@@ -839,6 +857,125 @@ class Canopy:
                 required_fields = [oid_field, shape_field, gt_field]
                 extra_fields = [x.name for x in all_fields
                         if x.name not in required_fields]
+                arcpy.DeleteField_management(shp_path, extra_fields)
+
+        # clear selection again
+        arcpy.SelectLayerByAttribute_management(phyregs_layer,
+                                                'CLEAR_SELECTION')
+
+        print('Completed')
+
+    def update_gtpoints(self, old_points, phyreg_ids):
+        '''
+        This function copies a previous years GT points and copies the
+        points but with the new years GT values. It addtionally corrects the
+        values if they are within an inverted region.
+
+        Parameters
+        ----------
+        old_points : str
+            Layer name for the previous years points
+        phyreg_ids : list
+            list of physiographic region IDs to process
+        '''
+        phyregs_layer = self.phyregs_layer
+        naipqq_layer = self.naipqq_layer
+        spatref_wkid = self.spatref_wkid
+        analysis_year = self.analysis_year
+        results_path = self.results_path
+
+        arcpy.env.overwriteOutput = True
+        arcpy.env.addOutputsToMap = False
+        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(spatref_wkid)
+
+        # use configparser converter to read list
+        conf = ConfigParser(converters={'list': lambda x: [int(i.strip())
+                                                    for i in x.split(',')]})
+        conf.read(self.config)
+        inverted_reg = conf.getlist('config', 'inverted_phyreg_ids')
+
+        # make sure to clear selection because most geoprocessing tools use
+        # selected features, if any
+        arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
+
+        # select phyregs features to process
+        arcpy.SelectLayerByAttribute_management(phyregs_layer,
+                                                where_clause='PHYSIO_ID in (%s)' % ','.join(map(str,
+                                                                                                phyreg_ids)))
+        with arcpy.da.SearchCursor(phyregs_layer,
+                ['NAME', 'PHYSIO_ID']) as cur:
+            for row in cur:
+                name = row[0]
+                print(name)
+                # CreateRandomPoints cannot create a shapefile with - in its
+                # filename
+                name = name.replace(' ', '_').replace('-', '_')
+                phyreg_id = row[1]
+                # Check if region is inverted
+                for i in range(len(inverted_reg)):
+                    if row[1] == inverted_reg[i]:
+                        inverted = True
+
+                outdir_path = '%s/%s/Outputs' % (results_path, name)
+                shp_filename = 'gtpoints_%d_%s.shp' % (analysis_year, name)
+
+                tmp_shp_filename = 'tmp_%s' % shp_filename
+                tmp_shp_path = '%s/%s' % (outdir_path, tmp_shp_filename)
+
+                # create random points
+                arcpy.SelectLayerByAttribute_management(phyregs_layer,
+                        where_clause='PHYSIO_ID=%d' % phyreg_id)
+
+                # create a new field to store data for ground truthing
+                gt_field = 'GT_%s' % analysis_year
+                arcpy.CopyFeatures_management(old_points, tmp_shp_path)
+                arcpy.AddField_management(tmp_shp_path, gt_field, 'SHORT')
+
+                # spatially join the naip qq layer to random points to find
+                # output tile filenames
+                shp_path = '%s/%s' % (outdir_path, shp_filename)
+                arcpy.analysis.SpatialJoin(tmp_shp_path, naipqq_layer, shp_path)
+
+                # delete temporary point shapefile
+                arcpy.Delete_management(tmp_shp_path)
+
+                # get required fields from spatially joined point layer
+                with arcpy.da.UpdateCursor(shp_path, ['SHAPE@XY', gt_field,
+                                                      'FileName']) as cur2:
+                    for row2 in cur2:
+                        # read filename
+                        filename = row2[2][:-13]
+                        # construct the final output tile path
+                        cfrtiffile_path = '%s/cfr%s.tif' % (outdir_path,
+                                                            filename)
+                        # read the output tile as raster
+                        ras = arcpy.sa.Raster(cfrtiffile_path)
+                        # resolution
+                        res = (ras.meanCellWidth, ras.meanCellHeight)
+                        # convert raster to numpy array to read cell values
+                        ras_a = arcpy.RasterToNumPyArray(ras)
+                        # get xy values of point
+                        xy = row2[0]
+                        # perform calculate_row_column to get the row and column
+                        # of the point
+                        rc = self.calculate_row_column(xy, ras.extent, res)
+                        # update the point, correct inverted region points
+                        if inverted is True:
+                            row2[1] = 1 - ras_a[rc]
+                            cur2.updateRow(row2)
+                        else:
+                            row2[1] = ras_a[rc]
+                            cur.updateRow(row2)
+
+                # delete all fields except only those required
+                shp_desc = arcpy.Describe(shp_path)
+                oid_field = shp_desc.OIDFieldName
+                shape_field = shp_desc.shapeFieldName
+
+                all_fields = arcpy.ListFields(shp_path)
+                required_fields = [oid_field, shape_field, gt_field]
+                extra_fields = [x.name for x in all_fields
+                                if x.name not in required_fields]
                 arcpy.DeleteField_management(shp_path, extra_fields)
 
         # clear selection again
