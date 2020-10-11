@@ -915,6 +915,8 @@ class Canopy:
                 for i in range(len(inverted_reg)):
                     if row[1] == inverted_reg[i]:
                         inverted = True
+                    else:
+                        inverted = False
 
                 outdir_path = '%s/%s/Outputs' % (results_path, name)
                 shp_filename = 'gtpoints_%d_%s.shp' % (analysis_year, name)
@@ -965,7 +967,7 @@ class Canopy:
                             cur2.updateRow(row2)
                         else:
                             row2[1] = ras_a[rc]
-                            cur.updateRow(row2)
+                            cur2.updateRow(row2)
 
                 # delete all fields except only those required
                 shp_desc = arcpy.Describe(shp_path)
