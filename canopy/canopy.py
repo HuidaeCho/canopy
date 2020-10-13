@@ -285,11 +285,18 @@ class Canopy:
         naipqq_layer = self.naipqq_layer
         naipqq_phyregs_field = self.naipqq_phyregs_field
         spatref_wkid = self.spatref_wkid
-        snaprast_path = self.snaprast_path
+        snaprast_path = self.snaprast_path_1m
         naip_path = self.naip_path
         results_path = self.results_path
+        if self.snap_grid_1m is True:
+            snaprast_path = self.snaprast_path_1m
+        else:
+            snaprast_path = self.snaprast_path
 
         spatref = arcpy.SpatialReference(spatref_wkid)
+
+        # Determine raster cellsize and make sure it is enforced through out
+        cell = arcpy.GetRasterProperties_management(snaprast_path, 'CELLSIZEX')
 
         arcpy.env.addOutputsToMap = False
         if not os.path.exists(snaprast_path):
@@ -331,7 +338,6 @@ class Canopy:
                         filename = '%s.tif' % row2[0][:-13]
                         folder = filename[2:7]
                         infile_path = '%s/%s/%s' % (naip_path, folder, filename)
-                        print(infile_path)
                         #########
                         ## Continue if path does not exist to allow for testing
                         ## of sample area
@@ -340,9 +346,14 @@ class Canopy:
                         #########
                         outfile_path = '%s/r%s' % (outdir_path, filename)
                         if not os.path.exists(outfile_path):
+                            # Use temporary memory workspace so as to not have
+                            # write intermediate raster to disk.
+                            tmp = "in_memory/tmp_ras"
                             arcpy.ProjectRaster_management(infile_path,
-                                    outfile_path, spatref)
-
+                                    tmp, spatref)
+                            # Resample to cell size of snapraster grid and snap
+                            arcpy.Resample_management(tmp, outfile_path,
+                                                      cell, "NEAREST")
         # clear selection
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                                                 'CLEAR_SELECTION')
