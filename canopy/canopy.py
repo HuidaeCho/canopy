@@ -353,7 +353,7 @@ class Canopy:
                                     tmp, spatref)
                             # Resample to cell size of snapraster grid and snap
                             arcpy.Resample_management(tmp, outfile_path,
-                                                      cell, "NEAREST")
+                                                      cell, "CUBIC")
         # clear selection
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                                                 'CLEAR_SELECTION')
