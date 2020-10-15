@@ -791,9 +791,10 @@ class Canopy:
                 area_sqkm = row[2]
 
                 # Check if region is inverted
-                for i in range(len(inverted_reg)):
-                    if row[1] == inverted_reg[i]:
-                        inverted = True
+                if row[1] in inverted_reg:
+                    inverted = True
+                else:
+                    inverted = False
 
                 # +1 to count partial points; e.g., 0.1 requires one point
                 point_count = int(min_points + (max_points - min_points) /
@@ -911,8 +912,8 @@ class Canopy:
 
         # select phyregs features to process
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
-                                                where_clause='PHYSIO_ID in (%s)' % ','.join(map(str,
-                                                                                                phyreg_ids)))
+            where_clause='PHYSIO_ID in (%s)' % ','.join(map(str,
+                phyreg_ids)))
         with arcpy.da.SearchCursor(phyregs_layer,
                 ['NAME', 'PHYSIO_ID']) as cur:
             for row in cur:
@@ -923,11 +924,10 @@ class Canopy:
                 name = name.replace(' ', '_').replace('-', '_')
                 phyreg_id = row[1]
                 # Check if region is inverted
-                for i in range(len(inverted_reg)):
-                    if row[1] == inverted_reg[i]:
-                        inverted = True
-                    else:
-                        inverted = False
+                if row[1] in inverted_reg:
+                    inverted = True
+                else:
+                    inverted = False
 
                 outdir_path = '%s/%s/Outputs' % (results_path, name)
                 shp_filename = 'gtpoints_%d_%s.shp' % (analysis_year, name)
