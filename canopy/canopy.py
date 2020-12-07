@@ -65,9 +65,6 @@ class Canopy:
     update_config(**parameters):
         Allows CanoPy attributes to be written directly in the generated *.cfg
         file.
-    reload_cfg():
-        Allows the Canopy attributes from the configuration file to be
-        reloaded if the file has been changed.
     regions(phyregs):
         Adds the desired regions to self.phyreg_ids
     calculate_row_column(xy, rast_ext, rast_res):
@@ -126,7 +123,7 @@ class Canopy:
         if not os.path.exists(config_path):
             self.gen_cfg(config_path)
             self.config = config_path
-        self.reload_cfg()
+        self.__reload_cfg()
 
     def gen_cfg(self, config_path):
         '''
