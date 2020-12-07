@@ -62,6 +62,9 @@ class Canopy:
     -------
     gen_cfg(config_path):
         Generates a template configuration file at the specified location.
+    update_config(**parameters):
+        Allows CanoPy attributes to be written directly in the generated *.cfg
+        file.
     reload_cfg():
         Allows the Canopy attributes from the configuration file to be
         reloaded if the file has been changed.
@@ -140,9 +143,9 @@ class Canopy:
         print("CanoPy config generated at %s" % config_path)
         return config_path
 
-    def reload_cfg(self):
+    def __reload_cfg(self):
         '''
-        Updates the configuration parameters within the Canopy object if changes
+        Reloads the configuration parameters within the Canopy object if changes
         have been made to the *.cfg file. This allows for changes to be made to
         the overall configuration with out the object or the python environment
         having to be reinitalized.
@@ -165,6 +168,104 @@ class Canopy:
         self.results_path = str.strip(conf.get('config', 'results_path'))
         self.analysis_year = int(conf.get('config', 'analysis_year'))
         self.snap_grid_1m = conf.getboolean('config', 'use_1m_output')
+
+    def update_config(self, **parameters):
+        '''
+        Updates the configuration parameters directly in the Canopy *.cfg file.
+
+        Keyword Args
+        ------------
+
+        phyregs_layer: str
+            This input layer contains the polygon features for all physiographic
+            regions.
+                Required fields:
+                NAME (Text)
+                PHYSIO_ID (Long)
+                AREA (Float)
+        naipqq_layer: str
+            This input layer contains the polygon features for all NAIP tiles.
+                Required field:
+                FileName (Text)
+        naipqq_phyregs_field: str
+            This output text field will be created in the naipqq layer by
+            assign_phyregs_to_naipqq().
+        naip_path: str
+            The structure of this input folder is defined by USDA, the original
+            source of NAIP imagery. Under this folder are multiple 5-digit
+            numeric folders that contain actual imagery GeoTIFF files.
+            For example,
+                F:/Georgia/ga/
+                    34083/
+                        m_3408301_ne_17_1_20090929.tif
+                        m_3408301_ne_17_1_20090930.tif
+                        ...
+                    34084/
+                        m_3408407_ne_16_1_20090930.tif
+                        m_3408407_nw_16_1_20090930.tif
+                        ...
+                    ...
+        spatref_wkid: int
+            Well-Known IDs (WKIDs) are numeric identifiers for coordinate
+            systems administered by Esri. This variable specifies the target
+            spatial reference for output files
+        project_path: str
+            This variable specifies the path to the project root folder
+            The default structure of the project folder is defined as follows:
+            C:/.../ (project_path)
+                Data/
+                    Physiographic_Districts_GA.shp (added as a layer)
+                        2009 Analysis/ (analysis_path)
+                            Data/
+                                naip_ga_2009_1m_m4b.shp (added as a layer)
+                                snaprast.tif (snaprast_path)
+                            Results/ (results_path)
+                                Winder_Slope/ (physiographic region name)
+                                    Inputs/
+                                        reprojected NAIP tiles
+                                    Outputs/
+                                        intermediate output tiles
+                                        canopy_2009_Winder_Slope.tif
+                                        gtpoints_2009_Winder_Slope.tif
+                        ...
+        analysis_year: int
+            This variable specifies the year for analysis.
+        use_1m_output: bool
+            Predicate if rasters are to be reprojected to 1m cell outputs.
+        snaprast_path: str
+            This input/output raster is used to snap NAIP tiles to a consistent
+            grid system. If this file does not already exist, the filename part
+            of snaprast_path must be 'r' + the filename of an existing original
+            NAIP tile so that reproject_input_tiles() can automatically create
+            it based on the folder structure of the NAIP imagery data
+            (naip_path).
+        snaprast_path_1m: str
+            Evaluated if 'use_1m_output' = True. Seperate snap raster for
+            additional 1m snapping grid.
+
+        '''
+
+        # Read the configuration file
+        conf = ConfigParser(inline_comment_prefixes='#')
+        conf.read(self.config)
+
+        # List of parameters which can be edited by user.
+        params = ["phyregs_layer", "naipqq_layer", "naipqq_phyregs_field",
+                  "naip_path", "spatref_wkid", "project_path", "analysis_year",
+                  "use_1m_output", "snaprast_path", "snaprast_path_1m"]
+
+        # iterate over key word parameters and if present, overwrite entry in
+        # config file.
+        for arg in parameters:
+            for p in params:
+                if arg is p:
+                    # Get parameters entry from key word dictonary.
+                    conf.set('config', arg, f'{parameters.get(arg)}')
+        # Write file
+        with open(self.config, 'w') as configfile:
+            conf.write(configfile)
+        # Reload the configuration within the CanoPy object.
+        self.__reload_cfg()
 
     def regions(self, phyregs):
         '''
@@ -305,7 +406,7 @@ class Canopy:
             if len(snaprast_file) == 28:
                 infile_path = '%s/%s/%s' % (naip_path, snaprast_file[2:7],
                                             snaprast_file)
-            if len(snaprast_file) == 26:
+            else:
                 infile_path = '%s/%s/%s' % (naip_path, snaprast_file[3:8],
                                             snaprast_file[1:])
             arcpy.ProjectRaster_management(infile_path, snaprast_path, spatref)
@@ -313,7 +414,7 @@ class Canopy:
 
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                 where_clause='PHYSIO_ID in (%s)' % ','.join(map(str,
-                                                                self.phyreg_ids)))
+                                            self.phyreg_ids)))
         with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
             for row in cur:
                 name = row[0]
@@ -375,15 +476,12 @@ class Canopy:
         else:
             snaprast_path = self.snaprast_path
 
-        # Determine raster cellsize and make sure it is enforced through out
-        cell = arcpy.GetRasterProperties_management(snaprast_path, 'CELLSIZEX')
-
         arcpy.env.addOutputsToMap = False
         arcpy.env.snapRaster = snaprast_path
 
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                 where_clause='PHYSIO_ID in (%s)' % ','.join(map(str,
-                                                                self.phyreg_ids)))
+                                                        self.phyreg_ids)))
         with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
             for row in cur:
                 name = row[0]
@@ -411,21 +509,9 @@ class Canopy:
                         if os.path.exists(rshpfile_path):
                             arcpy.FeatureToRaster_conversion(rshpfile_path,
                                     'CLASS_ID', frtiffile_path)
-                            ########
-                            # arcpy.Resample_management(temp_tif,
-                            #                          frtiffile_path,
-                            #                          cell,
-                            #                          'NEAREST')
-                            ########
                         elif os.path.exists(rtiffile_path):
                             arcpy.Reclassify_3d(rtiffile_path, 'Value',
                                                 '1 0;2 1', frtiffile_path)
-                            ########
-                            # arcpy.Resample_management(temp_tif,
-                            #                          frtiffile_path,
-                            #                          cell,
-                            #                          'NEAREST')
-                            ########
         # clear selection
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                                                 'CLEAR_SELECTION')
@@ -456,7 +542,7 @@ class Canopy:
 
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                 where_clause='PHYSIO_ID in (%s)' % ','.join(map(str,
-                                                                self.phyreg_ids)))
+                                                        self.phyreg_ids)))
         with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
             for row in cur:
                 name = row[0]
@@ -482,14 +568,9 @@ class Canopy:
                             outdir_path, filename)
                         if os.path.exists(cfrtiffile_path):
                             continue
-                        ########
-                        # Skip file path if it does not exist to allow for small
-                        # area testing
-                        if not os.path.exists(frtiffile_path):
-                            continue
-                        ########
                         if os.path.exists(frtiffile_path):
-                            arcpy.SelectLayerByAttribute_management(naipqq_layer,
+                            arcpy.SelectLayerByAttribute_management(
+                                    naipqq_layer,
                                     where_clause='%s=%d' % (
                                         naipqq_oid_field, oid))
                             arcpy.gp.ExtractByMask_sa(
@@ -524,7 +605,7 @@ class Canopy:
 
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                 where_clause='PHYSIO_ID in (%s)' % ','.join(map(str,
-                                                                self.phyreg_ids)))
+                                                        self.phyreg_ids)))
         with arcpy.da.SearchCursor(phyregs_layer, ['NAME', 'PHYSIO_ID']) as cur:
             for row in cur:
                 name = row[0]
@@ -553,14 +634,12 @@ class Canopy:
                             filename = row2[0][:-13]
                             cfrtiffile_path = '%s/cfr%s.tif' % (outdir_path,
                                     filename)
-                            ########
                             if not os.path.exists(cfrtiffile_path):
                                 input_rasters += ''
                             if input_rasters is not '':
                                 input_rasters += ';'
                             if os.path.exists(cfrtiffile_path):
                                 input_rasters += "'%s'" % cfrtiffile_path
-                            ########
                     if input_rasters == '':
                         continue
                     arcpy.MosaicToNewRaster_management(input_rasters,
@@ -766,7 +845,7 @@ class Canopy:
 
         # use configparser converter to read list
         conf = ConfigParser(converters={'list': lambda x: [int(i.strip())
-                                                           for i in x.split(',')]})
+                                                    for i in x.split(',')]})
         conf.read(self.config)
         inverted_reg = conf.getlist('config', 'inverted_phyreg_ids')
 
@@ -798,9 +877,8 @@ class Canopy:
 
                 # +1 to count partial points; e.g., 0.1 requires one point
                 point_count = int(min_points + (max_points - min_points) /
-                    (max_area_sqkm - min_area_sqkm) * (area_sqkm - min_area_sqkm)
-                     + 1)
-
+                        (max_area_sqkm - min_area_sqkm) *
+                        (area_sqkm - min_area_sqkm) + 1)
                 print('Raw point count: %d' % point_count)
                 if point_count < min_points:
                     point_count = min_points
