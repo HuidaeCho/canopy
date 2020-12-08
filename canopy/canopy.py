@@ -436,22 +436,13 @@ class Canopy:
                         filename = '%s.tif' % row2[0][:-13]
                         folder = filename[2:7]
                         infile_path = '%s/%s/%s' % (naip_path, folder, filename)
-                        #########
-                        ## Continue if path does not exist to allow for testing
-                        ## of sample area
-                        #if not os.path.exists(infile_path):
-                        #    continue
-                        #########
                         outfile_path = '%s/r%s' % (outdir_path, filename)
                         if not os.path.exists(outfile_path):
                             # Use temporary memory workspace so as to not have
                             # write intermediate raster to disk.
-                            tmp = "in_memory/tmp_ras"
                             arcpy.ProjectRaster_management(infile_path,
-                                    tmp, spatref)
-                            # Resample to cell size of snapraster grid and snap
-                            arcpy.Resample_management(tmp, outfile_path,
-                                                      cell, "CUBIC")
+                                    outfile_path, spatref)
+
         # clear selection
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                                                 'CLEAR_SELECTION')
