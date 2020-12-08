@@ -43,14 +43,6 @@ class Canopy:
         existing original NAIP tile so that reproject_input_tiles() can
         automatically create it based on the folder structure of the
         NAIP imagery data (naip_path).
-    snaprast_path_1m : str
-        The same as 'snaprast_path' but to snap newer NAIP data with
-        higher spatial resolutions to the previous years grids for
-        proper comparison. This path must be of raster with a previous
-        years 1m grid if the original data is less than 1m in resolution.
-    snap_grid_1m : bool
-        Boolean which determines whether or not to snap to the previous
-        years grids.
     results_path : str
         Folder which will contain all outputs.
     analysis_year : int
@@ -161,10 +153,8 @@ class Canopy:
         self.naip_path = str.strip(conf.get('config', 'naip_path'))
         self.spatref_wkid = int(conf.get('config', 'spatref_wkid'))
         self.snaprast_path = str.strip(conf.get('config', 'snaprast_path'))
-        self.snaprast_path_1m = str.strip(conf.get('config', 'snaprast_path_1m'))
         self.results_path = str.strip(conf.get('config', 'results_path'))
         self.analysis_year = int(conf.get('config', 'analysis_year'))
-        self.snap_grid_1m = conf.getboolean('config', 'use_1m_output')
 
     def update_config(self, **parameters):
         '''
@@ -227,8 +217,6 @@ class Canopy:
                         ...
         analysis_year: int
             This variable specifies the year for analysis.
-        use_1m_output: bool
-            Predicate if rasters are to be reprojected to 1m cell outputs.
         snaprast_path: str
             This input/output raster is used to snap NAIP tiles to a consistent
             grid system. If this file does not already exist, the filename part
@@ -236,10 +224,6 @@ class Canopy:
             NAIP tile so that reproject_input_tiles() can automatically create
             it based on the folder structure of the NAIP imagery data
             (naip_path).
-        snaprast_path_1m: str
-            Evaluated if 'use_1m_output' = True. Seperate snap raster for
-            additional 1m snapping grid.
-
         '''
 
         # Read the configuration file
@@ -249,7 +233,7 @@ class Canopy:
         # List of parameters which can be edited by user.
         params = ["phyregs_layer", "naipqq_layer", "naipqq_phyregs_field",
                   "naip_path", "spatref_wkid", "project_path", "analysis_year",
-                  "use_1m_output", "snaprast_path", "snaprast_path_1m"]
+                  "snaprast_path"]
 
         # iterate over key word parameters and if present, overwrite entry in
         # config file.
@@ -383,18 +367,11 @@ class Canopy:
         naipqq_layer = self.naipqq_layer
         naipqq_phyregs_field = self.naipqq_phyregs_field
         spatref_wkid = self.spatref_wkid
-        snaprast_path = self.snaprast_path_1m
         naip_path = self.naip_path
         results_path = self.results_path
-        if self.snap_grid_1m is True:
-            snaprast_path = self.snaprast_path_1m
-        else:
-            snaprast_path = self.snaprast_path
+        snaprast_path = self.snaprast_path
 
         spatref = arcpy.SpatialReference(spatref_wkid)
-
-        # Determine raster cellsize and make sure it is enforced through out
-        cell = arcpy.GetRasterProperties_management(snaprast_path, 'CELLSIZEX')
 
         arcpy.env.addOutputsToMap = False
         if not os.path.exists(snaprast_path):
@@ -438,8 +415,6 @@ class Canopy:
                         infile_path = '%s/%s/%s' % (naip_path, folder, filename)
                         outfile_path = '%s/r%s' % (outdir_path, filename)
                         if not os.path.exists(outfile_path):
-                            # Use temporary memory workspace so as to not have
-                            # write intermediate raster to disk.
                             arcpy.ProjectRaster_management(infile_path,
                                     outfile_path, spatref)
 
@@ -459,10 +434,7 @@ class Canopy:
         naipqq_layer = self.naipqq_layer
         naipqq_phyregs_field = self.naipqq_phyregs_field
         results_path = self.results_path
-        if self.snap_grid_1m is True:
-            snaprast_path = self.snaprast_path_1m
-        else:
-            snaprast_path = self.snaprast_path
+        snaprast_path = self.snaprast_path
 
         arcpy.env.addOutputsToMap = False
         arcpy.env.snapRaster = snaprast_path
@@ -516,11 +488,7 @@ class Canopy:
         naipqq_layer = self.naipqq_layer
         naipqq_phyregs_field = self.naipqq_phyregs_field
         results_path = self.results_path
-
-        if self.snap_grid_1m is True:
-            snaprast_path = self.snaprast_path_1m
-        else:
-            snaprast_path = self.snaprast_path
+        snaprast_path = self.snaprast_path
 
         # Get inmutiable ID's, does not need to be encoded.
         naipqq_oid_field = arcpy.Describe(naipqq_layer).OIDFieldName
@@ -582,11 +550,7 @@ class Canopy:
         naipqq_phyregs_field = self.naipqq_phyregs_field
         analysis_year = self.analysis_year
         results_path = self.results_path
-
-        if self.snap_grid_1m is True:
-            snaprast_path = self.snaprast_path_1m
-        else:
-            snaprast_path = self.snaprast_path
+        snaprast_path = self.snaprast_path
 
         arcpy.env.addOutputsToMap = False
         arcpy.env.snapRaster = snaprast_path
@@ -681,11 +645,7 @@ class Canopy:
         phyregs_layer = self.phyregs_layer
         analysis_year = self.analysis_year
         results_path = self.results_path
-
-        if self.snap_grid_1m is True:
-            snaprast_path = self.snaprast_path_1m
-        else:
-            snaprast_path = self.snaprast_path
+        snaprast_path = self.snaprast_path
 
         arcpy.env.addOutputsToMap = False
         arcpy.env.snapRaster = snaprast_path

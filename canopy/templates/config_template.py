@@ -114,14 +114,6 @@ analysis_path = %(analysis_path_format)s
 # structure of the NAIP imagery data (naip_path).
 snaprast_path = %(analysis_path)s/Data/rm_3408504_nw_16_1_20090824.tif
 
-# Boolean variable that determines if the raster should be snapped to a 
-# prexisting 1m grid if the original data is not at a 1m resolution in order to 
-# facilitate accurate comparisons with previous datasets. 
-# ** If 'True' then all the snaprast_path_1m must be populated with a 1m raster
-# which the snapping grid will be based around. 
-use_1m_output=True
-snaprast_path_1m = %(analysis_path)s/Data/rm_3408504_nw_16_1_20090824.tif
-
 # This folder will contain all result files.
 results_path = %(analysis_path)s/Results 
 
