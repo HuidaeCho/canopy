@@ -853,7 +853,7 @@ class Canopy:
                 # spatially join the naip qq layer to random points to find
                 # output tile filenames
                 shp_path = '%s/%s' % (outdir_path, shp_filename)
-                arcpy.analysis.SpatialJoin(tmp_shp_path, naipqq_layer, shp_path)
+                arcpy.SpatialJoin_analysis(tmp_shp_path, naipqq_layer, shp_path)
 
                 # delete temporary point shapefile
                 arcpy.Delete_management(tmp_shp_path)
@@ -973,7 +973,7 @@ class Canopy:
                 # spatially join the naip qq layer to random points to find
                 # output tile filenames
                 shp_path = '%s/%s' % (outdir_path, shp_filename)
-                arcpy.analysis.SpatialJoin(tmp_shp_path, naipqq_layer, shp_path)
+                arcpy.SpatialJoin_analysis(tmp_shp_path, naipqq_layer, shp_path)
 
                 # delete temporary point shapefile
                 arcpy.Delete_management(tmp_shp_path)
