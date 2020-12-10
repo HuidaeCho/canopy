@@ -309,7 +309,7 @@ class Canopy:
                 break
         arcpy.AddField_management(phyregs_layer, phyregs_area_sqkm_field,
                                   'DOUBLE')
-        arcpy.management.CalculateGeometryAttributes(phyregs_layer,
+        arcpy.CalculateGeometryAttributes_management(phyregs_layer,
                 [[phyregs_area_sqkm_field, 'AREA']], '', 'SQUARE_KILOMETERS')
 
         # calculate naipqq_phyregs_field
@@ -735,10 +735,10 @@ class Canopy:
                         arcpy.RasterToPolygon_conversion(canopytif_path,
                                 canopyshp_path, 'NO_SIMPLIFY', 'Value')
                     # Add 'Canopy' field
-                    arcpy.management.AddField(canopyshp_path, 'Canopy', 'SHORT',
+                    arcpy.AddField_management(canopyshp_path, 'Canopy', 'SHORT',
                                               field_length='1')
                     # Calculate 'Canopy' field
-                    arcpy.management.CalculateField(canopyshp_path, 'Canopy',
+                    arcpy.CalculateField_management(canopyshp_path, 'Canopy',
                                                     '!gridcode!')
                     # Remove Id and gridcode fields
                     arcpy.DeleteField_management(canopyshp_path, ['Id',
