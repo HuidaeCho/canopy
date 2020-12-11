@@ -5,13 +5,19 @@ config_template = """
 # Purpose: This module provides example configurations for the canopy.py
 #          module. Please copy this file to canopy_config.py and edit the
 #          latter.
-# Author:  Huidae Cho, Ph.D., IESA, University of North Georgia
+# Authors:  Huidae Cho, Ph.D., IESA, University of North Georgia
+#           Owen Smith, IESA, University of North Georgia
 # Since:   November 29, 2019
 # Grant:   Sponsored by the Georgia Forestry Commission through the Georgia
 #          Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project
 ################################################################################
 
 [config]
+
+# Predicate parameter where 1 = True and 0 = False. Determined whether or not 
+# to print elapsed times for processing functions.
+
+verbosity = 1
 
 # This input layer contains the polygon features for all physiographic regions.
 # Data source: Physiographic_Districts_GA.zip

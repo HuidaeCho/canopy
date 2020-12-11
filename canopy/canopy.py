@@ -12,6 +12,7 @@ import arcpy
 import os
 from .templates import config_template
 from configparser import ConfigParser
+import time
 
 
 class Canopy:
@@ -117,6 +118,19 @@ class Canopy:
             self.config = config_path
         self.__reload_cfg()
 
+    def __timed(func):
+        # Decorative function for verbose time outputs
+        def wrapper(self, *args, **kwargs):
+            if self.verbosity == 1:
+                start_time = time.time()
+                func(self, *args, **kwargs)
+                end_time = time.time() - start_time
+                print(f"---- {end_time / 60} minutes elapsed----")
+            else:
+                func(self, *args, **kwargs)
+
+        return wrapper
+
     def gen_cfg(self, config_path):
         '''
         Generates a template configuration file at the specified location.
@@ -144,6 +158,7 @@ class Canopy:
         conf.read(self.config)
 
         # Get individual attributes from configuration
+        self.verbosity = int(conf.get('config', 'verbosity'))
         self.phyregs_layer = str.strip(conf.get('config', 'phyregs_layer'))
         self.phyregs_area_sqkm_field = str.strip(conf.get('config',
                                                     'phyregs_area_sqkm_field'))
@@ -262,7 +277,7 @@ class Canopy:
         for i in range(len(phyregs)):
             self.phyreg_ids.append(phyregs[i])
 
-    def calculate_row_column(self, xy, rast_ext, rast_res):
+    def __calculate_row_column(self, xy, rast_ext, rast_res):
         '''
         This function calculates array row and column using x, y, extent, and
         resolution.
@@ -358,6 +373,7 @@ class Canopy:
 
         print('Completed')
 
+    @__timed
     def reproject_naip_tiles(self):
         '''
         This function reprojects and snaps the NAIP tiles that intersect
@@ -426,6 +442,7 @@ class Canopy:
 
         print('Completed')
 
+    @__timed
     def convert_afe_to_final_tiles(self):
         '''
         This function converts AFE outputs to final TIFF files.
@@ -480,6 +497,7 @@ class Canopy:
 
         print('Completed')
 
+    @__timed
     def clip_final_tiles(self):
         '''
         This function clips final TIFF files.
@@ -540,6 +558,7 @@ class Canopy:
 
         print('Completed')
 
+    @__timed
     def mosaic_clipped_final_tiles(self):
         '''
         This function mosaics clipped final TIFF files and clips mosaicked files
@@ -610,6 +629,7 @@ class Canopy:
 
         print('Completed')
 
+    @__timed
     def convert_afe_to_canopy_tif(self):
         '''
         This function is a wrapper function that converts AFE outputs to the
@@ -617,20 +637,12 @@ class Canopy:
         clip_final_tiles(), and mosaic_clipped_final_tiles() in the correct
         order.
         '''
-        import time
 
-        start = time.time()
         self.convert_afe_to_final_tiles()
-        print(time.time() - start)
-
-        start = time.time()
         self.clip_final_tiles()
-        print(time.time() - start)
-
-        start = time.time()
         self.mosaic_clipped_final_tiles()
-        print(time.time() - start)
 
+    @__timed
     def correct_inverted_canopy_tif(self, inverted_phyreg_ids):
         '''
         This function corrects the values of mosaikced and clipped regions that
@@ -686,6 +698,7 @@ class Canopy:
 
         print('Completed')
 
+    @__timed
     def convert_canopy_tif_to_shp(self):
         '''
         This function converts the canopy TIFF files to shapefile. If a region
@@ -997,7 +1010,7 @@ class Canopy:
                         xy = row2[0]
                         # perform calculate_row_column to get the row and column
                         # of the point
-                        rc = self.calculate_row_column(xy, ras.extent, res)
+                        rc = self.__calculate_row_column(xy, ras.extent, res)
                         # update the point, correct inverted region points
                         if inverted is True:
                             row2[1] = 1 - ras_a[rc]
