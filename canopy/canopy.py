@@ -10,6 +10,7 @@
 
 import arcpy
 import os
+import glob
 from .templates import config_template
 from configparser import ConfigParser
 import time
@@ -467,9 +468,22 @@ class Canopy:
                 # filename
                 name = name.replace(' ', '_').replace('-', '_')
                 phyreg_id = row[1]
+                # Check and ensure that FA has classified all files.
                 outdir_path = '%s/%s/Outputs' % (results_path, name)
+                inputs_path = '%s/%s/Inputs' % (results_path, name)
+
                 if len(os.listdir(outdir_path)) == 0:
                     continue
+                inputs_check = [os.path.basename(x) for x in
+                                glob.glob(f"{inputs_path}/*.tif")]
+                output_class_check = [os.path.basename(x) for x in
+                                      glob.glob(f"{outdir_path}/*.tif")]
+                missing = []
+                for i in inputs_check:
+                    if i not in output_class_check:
+                        missing.append(i)
+                if len(inputs_check) != len(output_class_check):
+                    raise IOError(f"Missing classified file: {missing}")
                 arcpy.SelectLayerByAttribute_management(naipqq_layer,
                         where_clause="%s like '%%,%d,%%'" % (
                             naipqq_phyregs_field, phyreg_id))
@@ -478,8 +492,6 @@ class Canopy:
                         filename = row2[0][:-13]
                         rshpfile_path = '%s/r%s.shp' % (outdir_path, filename)
                         rtiffile_path = '%s/r%s.tif' % (outdir_path, filename)
-                        # Use legacy memory workspace
-                        temp_tif = 'in_memory/fr%s' % (filename)
                         frtiffile_path = '%s/fr%s.tif' % (outdir_path, filename)
                         if os.path.exists(frtiffile_path):
                             continue
