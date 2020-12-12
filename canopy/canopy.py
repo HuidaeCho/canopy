@@ -489,7 +489,9 @@ class Canopy:
                 # If any are missing then the length of each list will be
                 # different. Raise I/O error and return missing file names.
                 if len(inputs_check) != len(output_class_check):
-                    raise IOError(f"Missing classified file: {missing}")
+                    # Format the same way FA specifies batch inputs.
+                    missing_formated = " ".join(missing).replace(' ', '; ')
+                    raise IOError(f"Missing classified file: {missing_formated}")
                 arcpy.SelectLayerByAttribute_management(naipqq_layer,
                         where_clause="%s like '%%,%d,%%'" % (
                             naipqq_phyregs_field, phyreg_id))
