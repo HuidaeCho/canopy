@@ -470,18 +470,24 @@ class Canopy:
                 phyreg_id = row[1]
                 # Check and ensure that FA has classified all files.
                 outdir_path = '%s/%s/Outputs' % (results_path, name)
+                # Path for reprojected tiles
                 inputs_path = '%s/%s/Inputs' % (results_path, name)
 
                 if len(os.listdir(outdir_path)) == 0:
                     continue
+                # File names for all reprojected inputs
                 inputs_check = [os.path.basename(x) for x in
                                 glob.glob(f"{inputs_path}/*.tif")]
+                # File names for all classified outputs
                 output_class_check = [os.path.basename(x) for x in
                                       glob.glob(f"{outdir_path}/*.tif")]
+                # Check and get file names of those missing.
                 missing = []
                 for i in inputs_check:
                     if i not in output_class_check:
                         missing.append(i)
+                # If any are missing then the length of each list will be
+                # different. Raise I/O error and return missing file names.
                 if len(inputs_check) != len(output_class_check):
                     raise IOError(f"Missing classified file: {missing}")
                 arcpy.SelectLayerByAttribute_management(naipqq_layer,
