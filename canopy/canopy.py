@@ -1134,12 +1134,14 @@ class Check_gaps:
             #   ......
             #   ....XX
             #   ..XXXX
-            # the nodata cells are just outside the region boundary. This check
-            # will fail to flag wider gaps such as the following cases though:
+            # the nodata cells are just outside the region boundary. Depending
+            # on their locations, this check will fail to flag wider gaps such
+            # as the following cases though:
             #   XXXXXX    XXXXXX
-            #   X....X or X.X..X two in the middle
+            #   X....X or X.X..X
             #   XX...X    X..X.X
             #   XXXXXX    XXXXXX
+            #   6 right   2 middle nodata cells unflagged
             if val_dict.get(self.nodata) <= 2:
                 print("Gaps are present in mosaic")
                 break
