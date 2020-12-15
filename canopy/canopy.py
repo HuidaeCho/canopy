@@ -649,8 +649,9 @@ class Canopy:
                         number_of_bands=1)
                 arcpy.SelectLayerByAttribute_management(phyregs_layer,
                         where_clause='PHYSIO_ID=%d' % phyreg_id)
-                arcpy.gp.ExtractByMask_sa(mosaictif_path, phyregs_layer,
-                        canopytif_path)
+                canopytif_raster = arcpy.sa.ExtractByMask(mosaictif_path,
+                        phyregs_layer)
+                canopytif_raster.save(canopytif_path)
 
         # clear selection
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
