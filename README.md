@@ -18,10 +18,10 @@ using ArcGIS and Feature Analyst.
 
 ## Project team
 
-* Huidae Cho, Ph.D., Assistant Professor of Geospatial Science and Computing,
-  IESA, UNG
-* Owen Smith, Undergraduate Student, IESA, UNG
-* Jennifer McCollum, Undergraduate Student, IESA, UNG
+* Principal investigator: Huidae Cho, Ph.D., Assistant Professor of Geospatial
+  Science and Computing, IESA, UNG
+* Owen Smith, Undergraduate Student, IESA, UNG (Phases 1, 1.5, and 2)
+* Jennifer McCollum, Undergraduate Student, IESA, UNG (Phase 1)
 
 ## Acknowledgement
 

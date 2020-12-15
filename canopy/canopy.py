@@ -5,7 +5,10 @@
 # Authors: Huidae Cho, Ph.D., Owen Smith, IESA, University of North Georgia
 # Since:   November 29, 2019
 # Grant:   Sponsored by the Georgia Forestry Commission through the Georgia
-#          Statewide Canopy Assessment Phase I: Canopy Analysis 2009 project
+#          Statewide Canopy Assessment Project
+#          Phase 1:   2009 Canopy Analysis
+#          Phase 1.5: 2019 Canopy Analysis
+#          Phase 2:   2009-2019 Canopy Change Analysis
 ################################################################################
 
 import arcpy
