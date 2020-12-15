@@ -10,9 +10,11 @@
 
 import arcpy
 import os
+import glob
 from .templates import config_template
 from configparser import ConfigParser
 import time
+import numpy as np
 
 
 class Canopy:
@@ -467,9 +469,30 @@ class Canopy:
                 # filename
                 name = name.replace(' ', '_').replace('-', '_')
                 phyreg_id = row[1]
+                # Check and ensure that FA has classified all files.
                 outdir_path = '%s/%s/Outputs' % (results_path, name)
+                # Path for reprojected tiles
+                inputs_path = '%s/%s/Inputs' % (results_path, name)
+
                 if len(os.listdir(outdir_path)) == 0:
                     continue
+                # File names for all reprojected inputs
+                inputs_check = [os.path.basename(x) for x in
+                                glob.glob(f"{inputs_path}/rm_*.tif")]
+                # File names for all classified outputs
+                output_class_check = [os.path.basename(x) for x in
+                                      glob.glob(f"{outdir_path}/rm_*.tif")]
+                # Check and get file names of those missing.
+                missing = []
+                for i in inputs_check:
+                    if i not in output_class_check:
+                        missing.append(i)
+                # If any are missing then the length of each list will be
+                # different. Raise I/O error and return missing file names.
+                if len(inputs_check) != len(output_class_check):
+                    # Format the same way FA specifies batch inputs.
+                    missing_formated = " ".join(missing).replace(' ', '; ')
+                    raise IOError(f"Missing classified file: {missing_formated}")
                 arcpy.SelectLayerByAttribute_management(naipqq_layer,
                         where_clause="%s like '%%,%d,%%'" % (
                             naipqq_phyregs_field, phyreg_id))
@@ -478,8 +501,6 @@ class Canopy:
                         filename = row2[0][:-13]
                         rshpfile_path = '%s/r%s.shp' % (outdir_path, filename)
                         rtiffile_path = '%s/r%s.tif' % (outdir_path, filename)
-                        # Use legacy memory workspace
-                        temp_tif = 'in_memory/fr%s' % (filename)
                         frtiffile_path = '%s/fr%s.tif' % (outdir_path, filename)
                         if os.path.exists(frtiffile_path):
                             continue
@@ -547,9 +568,16 @@ class Canopy:
                                     naipqq_layer,
                                     where_clause='%s=%d' % (
                                         naipqq_oid_field, oid))
-                            arcpy.gp.ExtractByMask_sa(
-                                frtiffile_path, naipqq_layer, cfrtiffile_path)
-
+                            #tmp_buffer = "in_memory/buffer"
+                            # Buffer is added to include cells which may have
+                            # centroids outside of feature but still need to be
+                            # included for mosaiking purposes.
+                            #arcpy.Buffer_analysis(naipqq_layer,
+                            #    tmp_buffer, "0.3 Meters", "FULL",
+                            #    "FLAT", "ALL", None, "PLANAR")
+                            out_raster = arcpy.sa.ExtractByMask(
+                                frtiffile_path, naipqq_layer)
+                            out_raster.save(cfrtiffile_path)
         # clear selection
         arcpy.SelectLayerByAttribute_management(phyregs_layer,
                                                 'CLEAR_SELECTION')
@@ -1066,3 +1094,35 @@ class Canopy:
         arcpy.SelectLayerByAttribute_management(naipqq_layer, 'CLEAR_SELECTION')
 
         print('Completed')
+
+
+class Check_gaps:
+    '''
+    Object to check if gaps within in raster array are present.
+    '''
+    def __init__(self, arc_raster, nodata=3):
+        self.region_array = arcpy.RasterToNumPyArray(arc_raster,
+                                                     nodata_to_value=nodata)
+        self.nodata = nodata
+        self.check(self.region_array)
+
+    def __neighbors(self, arr, i, j, d=1):
+        # Neighbors function adapted from ocsmit/mwinpy.git
+        neighbors = arr[max(i - d, 0):min(i + d + 1, arr.shape[0]),
+            max(j - d, 0):min(j + d + 1, arr.shape[1])].flatten()
+        return neighbors
+
+    def check(self, arr):
+        # Get array i,j indices only where the value is equal to nodata.
+        index_i, index_j = np.where(arr >= self.nodata)
+        for i in range(len(index_i)):
+            # Get 8 neighbors of cell
+            n = self.__neighbors(arr, index_i[i], index_j[i])
+            # Get count of values in cell
+            u, c = np.unique(n, return_counts=True)
+            val_dict = dict(zip(u, c))
+            # If number of nodata cells is less than or equal to 2, then it
+            # is a gap in the mosaic.
+            if val_dict.get(self.nodata) <= 2:
+                print("Gaps are present in mosaic")
+                break
