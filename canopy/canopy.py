@@ -1122,7 +1122,24 @@ class Check_gaps:
             u, c = np.unique(n, return_counts=True)
             val_dict = dict(zip(u, c))
             # If number of nodata cells is less than or equal to 2, then it
-            # is a gap in the mosaic.
+            # is a gap in the mosaic. Here, we assume single-cell-wide gaps
+            # only. For example, see
+            #   XXXXXX    XXXXXX    XXXXXX
+            #   X....X or X..X.X or X.X..X
+            #   XXXXXX    XXXXXX    X.XX.X
+            #                       XXXXXX
+            # where X and . are non-nodata and nodata cells, respectively.
+            # These nodata cells (....) are a nodata gap within non-nodata
+            # cells. However, in the following case,
+            #   ......
+            #   ....XX
+            #   ..XXXX
+            # the nodata cells are just outside the region boundary. This check
+            # will fail to flag wider gaps such as the following cases though:
+            #   XXXXXX    XXXXXX
+            #   X....X or X.X..X two in the middle
+            #   XX...X    X..X.X
+            #   XXXXXX    XXXXXX
             if val_dict.get(self.nodata) <= 2:
                 print("Gaps are present in mosaic")
                 break
