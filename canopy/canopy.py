@@ -13,6 +13,7 @@
 
 import arcpy
 import os
+import sys
 import glob
 from .templates import config_template
 from configparser import ConfigParser
@@ -138,17 +139,14 @@ class Canopy:
 
     def __get_cellsizes(self, input_raster):
         # Returns a tuple of the x,y cell dimensions of raster
-        x = arcpy.GetRasterProperties_management(input_raster, "CELLSIZEX")
-        y = arcpy.GetRasterProperties_management(input_raster, "CELLSIZEY")
+        x = arcpy.Raster(input_raster).meanCellWidth
+        y = arcpy.Raster(input_raster).meanCellHeight
         return x, y
 
     def __check_float(self, x1, x2, tolerance):
         # Check if floats are within certain range or tolerance. Simple
         # predicate function.
-        if abs(x1 - x2) <= tolerance:
-            return True
-        else:
-            return False
+        return abs(x1 - x2) <= tolerance
 
     def __check_snap(self, input_raster):
 
@@ -162,15 +160,15 @@ class Canopy:
         # e.g. 0.6 -> 0.599999...
         check_x = self.__check_float(snap_x, in_x, 0.0001)
         check_y = self.__check_float(snap_y, in_y, 0.0001)
-
         # If both dimensions fall within tolerance do nothing. If not then
         # raise error.
         try:
-            if check_y != check_x:
+            if check_y is False and check_x is False:
                 raise ValueError
         except ValueError:
             print("Invlaid snapraster cellsize: The snapraster cell size does \n"
                   "not match that of the input rasters cellsize.")
+            sys.exit(1)
 
     def gen_cfg(self, config_path):
         '''
