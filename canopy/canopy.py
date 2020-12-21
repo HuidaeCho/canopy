@@ -136,6 +136,42 @@ class Canopy:
 
         return wrapper
 
+    def __get_cellsizes(self, input_raster):
+        # Returns a tuple of the x,y cell dimensions of raster
+        x = arcpy.GetRasterProperties_management(input_raster, "CELLSIZEX")
+        y = arcpy.GetRasterProperties_management(input_raster, "CELLSIZEY")
+        return x, y
+
+    def __check_float(self, x1, x2, tolerance):
+        # Check if floats are within certain range or tolerance. Simple
+        # predicate function.
+        if abs(x1 - x2) <= tolerance:
+            return True
+        else:
+            return False
+
+    def __check_snap(self, input_raster):
+
+        # Get the xy cell dimensions of both the snap raster and the
+        # input raster.
+        snap_x, snap_y = self.__get_cellsizes(self.snaprast_path)
+        in_x, in_y = self.__get_cellsizes(input_raster)
+
+        # Determine if cells dimensions wall within tolerance. Needed as
+        # reprojections can slightly skew float cell size,
+        # e.g. 0.6 -> 0.599999...
+        check_x = self.__check_float(snap_x, in_x, 0.0001)
+        check_y = self.__check_float(snap_y, in_y, 0.0001)
+
+        # If both dimensions fall within tolerance do nothing. If not then
+        # raise error.
+        try:
+            if check_y != check_x:
+                raise ValueError
+        except ValueError:
+            print("Invlaid snapraster cellsize: The snapraster cell size does \n"
+                  "not match that of the input rasters cellsize.")
+
     def gen_cfg(self, config_path):
         '''
         Generates a template configuration file at the specified location.
@@ -435,6 +471,7 @@ class Canopy:
                         folder = filename[2:7]
                         infile_path = '%s/%s/%s' % (naip_path, folder, filename)
                         outfile_path = '%s/r%s' % (outdir_path, filename)
+                        self.__check_snap(infile_path)
                         if not os.path.exists(outfile_path):
                             arcpy.ProjectRaster_management(infile_path,
                                     outfile_path, spatref)
@@ -510,7 +547,11 @@ class Canopy:
                         if os.path.exists(rshpfile_path):
                             arcpy.FeatureToRaster_conversion(rshpfile_path,
                                     'CLASS_ID', frtiffile_path)
+                            # Compare output tif cell size to snap raster
+                            self.__check_snap(frtiffile_path)
                         elif os.path.exists(rtiffile_path):
+                            # Compare input tif cell size to snap raster
+                            self.__check_snap(rtiffile_path)
                             arcpy.Reclassify_3d(rtiffile_path, 'Value',
                                                 '1 0;2 1', frtiffile_path)
         # clear selection
@@ -571,13 +612,6 @@ class Canopy:
                                     naipqq_layer,
                                     where_clause='%s=%d' % (
                                         naipqq_oid_field, oid))
-                            #tmp_buffer = "in_memory/buffer"
-                            # Buffer is added to include cells which may have
-                            # centroids outside of feature but still need to be
-                            # included for mosaiking purposes.
-                            #arcpy.Buffer_analysis(naipqq_layer,
-                            #    tmp_buffer, "0.3 Meters", "FULL",
-                            #    "FLAT", "ALL", None, "PLANAR")
                             out_raster = arcpy.sa.ExtractByMask(
                                 frtiffile_path, naipqq_layer)
                             out_raster.save(cfrtiffile_path)
